@@ -1,0 +1,69 @@
+namespace :symagent do
+    
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Configure symagent"
+    task :configure do
+        
+        puts "==> Configuring - agent: symagent ..."
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}" 
+        puts "==> Configuring - agent: symagent ... done"
+    
+    end
+
+    desc "Build symagent"
+    task :build do
+        puts "==> Compiling - agent: symagent ..."
+        sh "cd #{cwd} && make"
+        puts "==> Compiling - agent: symagent ... done"
+    end
+    
+    desc "Clean symagent"
+    task :clean do
+        puts "==> Cleaning - agent: symagent ..."
+        sh "cd #{cwd} && make distclean"
+        puts "==> Cleaning - agent: symagent ... done"
+    end
+    
+    desc "Install symagent"
+    task :install do
+        puts "==> Installing - agent : symagent ..."
+        sh "cd #{cwd} && make install"
+        Rake::Task["symagent:gen_config"].invoke unless File.exists?($CONF_DIR + "/symagent.xml")
+        puts "==> Installing - agent: symagent ... done"
+    end
+
+    desc "Generate symagent.xml"
+    task :gen_config do
+        puts "==> Generating symagent.xml - agent : symagent ..."
+        File.open($CONF_DIR + "/symagent.xml", "w") do |f|
+        f.write <<-SYMAGENT
+<?xml version="1.0" encoding="UTF-8"?>
+<!--AgentSDK configuration-->
+<preferences version="1.0" where="local">
+<certificates_dir>#{$CONF_DIR}/certs</certificates_dir>
+<logging>
+<directory>#{$LOG_DIR}</directory>
+<user/>
+</logging>
+<server>
+<host>#{$HOST_NAME}/opensims/agent</host>
+<port>80</port>
+<ssl_port>8443</ssl_port>
+</server>
+</preferences>
+        SYMAGENT
+        f.chmod 0600
+        end
+        puts "==> Generating symagent.xml - agent : symagent ... done"
+    end
+    
+    desc "Bootstrap symagent"
+    task :bootstrap do
+        puts "==> Bootstrapping - agent: symagent..."
+        ['symagent:configure', 'symagent:build', 'symagent:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "==> Bootstrapping - agent: symagent... done"
+    end
+end

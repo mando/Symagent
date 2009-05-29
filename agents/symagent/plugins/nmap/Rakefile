@@ -1,0 +1,43 @@
+namespace :nmap do
+
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap nmap"
+    task :bootstrap do
+        puts "===> Bootstrapping - plugin: nmap..."
+        ['nmap:configure', 'nmap:build', 'nmap:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "===> Bootstrapping - plugin: nmap... done"
+    
+    end
+
+    desc "Configure nmap"
+    task :configure do
+        puts "===> Configuring - plugin: nmap..."
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}"
+        puts "===> Configuring - plugin: nmap... done"
+    end
+
+    desc "Build nmap"
+    task :build do
+        puts "===> Compiling - plugin: nmap..."
+        sh "cd #{cwd} && make"
+        puts "===> Compiling - plugin: nmap... done"
+    end
+    
+    desc "Clean nmap"
+    task :clean do
+        puts "===> Cleaning - plugin: nmap..."
+        sh "cd #{cwd} && make distclean"
+        puts "===> Cleaning - plugin: nmap... done"
+    end
+    
+    desc "Install nmap"
+    task :install do
+        puts "===> Installing - plugin: nmap..."
+        sh "cd #{cwd} && make install"
+        puts "===> Installing - plugin: nmap... done"
+    end
+
+end

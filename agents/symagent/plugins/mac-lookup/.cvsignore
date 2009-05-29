@@ -1,0 +1,4 @@
+.libs
+Makefile
+libtool
+plugin-config.h

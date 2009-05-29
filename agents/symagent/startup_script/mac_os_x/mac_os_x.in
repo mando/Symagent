@@ -1,0 +1,45 @@
+#!/bin/sh
+
+##
+# Symbiot Agent: symagent
+##
+
+. /etc/rc.common
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+APP_DIR=@bindir@
+
+SYMAGENT_NAME=symagent
+LIBSYMBIOT_DIR=@LIBSYMBIOT_DIR@
+SYMAGENT_PATH=$APP_DIR/$SYMAGENT_NAME
+
+StartService ()
+{
+    if ! pid=$(GetPID symagent-tcp); then
+        ConsoleMessage "Starting Symbiot Agent: $SYMAGENT_NAME"
+        DYLD_LIBRARY_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH start
+    fi
+}
+
+StopService ()
+{
+    if pid=$(GetPID $SYMAGENT_NAME); then
+        ConsoleMessage "Stopping Symbiot Agent: $SYMAGENT_NAME"
+        kill -TERM "${pid}"
+    else
+        echo "$SYMAGENT_NAME is not running."
+    fi
+}
+
+RestartService ()
+{
+    if pid=$(GetPID $SYMAGENT_NAME); then
+        ConsoleMessage "Restarting Symbiot Agent: $SYMAGENT_NAME"
+        kill -HUP "${pid}"
+    else
+        StartService
+    fi
+}
+
+RunService "$1"

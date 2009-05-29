@@ -1,0 +1,7 @@
+.libs
+Makefile
+libtool
+autom4te.cache
+config.log
+config.status
+symlib-config.h

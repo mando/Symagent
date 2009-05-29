@@ -1,0 +1,59 @@
+#!/sbin/runscript
+
+# Symbiot Threat Profiler
+# local agent service control script
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+APP_DIR=@bindir@
+
+SYMAGENT_NAME=symagent
+
+LIBSYMBIOT_DIR=@LIBSYMBIOT_DIR@
+SYMAGENT_PATH=$APP_DIR/$SYMAGENT_NAME
+SYMAGENT_PID=@PID_DIR@/$SYMAGENT_NAME.pid
+
+#----------------------------------------------------------
+
+depend()
+{
+	after tomcat5
+	need net
+}
+
+start()
+{
+	ebegin "Starting $SYMAGENT_NAME"
+	LD_RUN_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH start
+	eend $?
+}
+
+stop()
+{
+	ebegin "Stopping $SYMAGENT_NAME"
+	LD_RUN_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH stop
+	eend $?
+}
+
+restart()
+{
+	# We don't use svc_stop or svc_start here
+	ebegin "Restarting $SYMAGENT_NAME"
+	LD_RUN_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH restart
+	eend $?
+}
+
+condrestart()
+{
+	if [ -f $SYMAGENT_PID ]; then
+		LD_RUN_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH restart
+	fi
+	eend $?
+}
+
+status()
+{
+	ebegin "Stopping $SYMAGENT_NAME"
+	LD_RUN_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH status
+	eend $?
+}

@@ -1,0 +1,20 @@
+
+libsymbiot is a collection of C++ routines and objects that allow stand-alone
+agents to be written that can communicate with the Symbiot Threat Profiler. 
+
+libsymbiot relies on the Borrowed Time Core C++ library which is distributable
+under the same terms as libsymbiot: The GNU Lesser Public License. Also 
+required is the Borrowed Time SSL library, which simplifiles the communication,
+authentication and key management used by libsymbiot.
+
+The latest versions of the BTI libraries can be found at:
+
+http://www.bti.net/
+
+The latest versions of libsymbiot can be found at:
+
+http://opensims.sourceforge.org/	
+http://www.opensims.org/
+
+Please review the LICENSE file for specific license information concerning
+this software. 

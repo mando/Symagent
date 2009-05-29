@@ -1,0 +1,243 @@
+# @(#) $Header: /cvs/opensims/agent/agents/symagent/Makefile.in,v 1.3 2006/11/21 06:17:41 mikee Exp $ (LBL)
+#
+#  Copyright (c) 1993, 1994, 1995, 1996
+#       The Regents of the University of California.  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that: (1) source code distributions
+#  retain the above copyright notice and this paragraph in its entirety, (2)
+#  distributions including binary code include the above copyright notice and
+#  this paragraph in its entirety in the documentation or other materials
+#  provided with the distribution, and (3) all advertising materials mentioning
+#  features or use of this software display the following acknowledgement:
+#  ``This product includes software developed by the University of California,
+#  Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+#  the University nor the names of its contributors may be used to endorse
+#  or promote products derived from this software without specific prior
+#  written permission.
+#  THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+
+############################################################################
+#        SYMBIOT
+#
+#        Real-time Network Threat Modeling
+#        (C) 2002-2004 Symbiot, Inc.     --      ALL RIGHTS RESERVED
+#
+#        Symbiot Master Library
+#
+#        http://www.symbiot.com
+#
+############################################################################
+
+CXX								=	@CXX@
+CC								=	@CXX@
+LIBTOOL							=	@LIBTOOL@
+CXXFLAGS						=	@CXXFLAGS@ -Wall -fpermissive
+LDFLAGS							=	@LDFLAGS@
+VSNFLAG							=	-version-info @VERSIONCURRENT@:@VERSIONREVISION@:@VERSIONAGE@
+LTFLAGS							=	--silent
+LIBS							=	@LIBS@
+INCLUDES						=	@INCLUDES@
+OPTIONAL_OBJECTS				=	@OPTIONAL_OBJECTS@
+
+COMPILE							=	$(CXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
+LTCOMPILE						=	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE)
+LINK_EXE						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -export-dynamic $(LDFLAGS) -o $@
+LINK_LIB						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -no-undefined $(VSNFLAG) -rpath $(libdir) $(LDFLAGS) -o $@
+LINK_PLUGIN						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -module -no-undefined $(VSNFLAG) -rpath $(libdir) $(LDFLAGS) -o $@
+
+INSTALL							=	@INSTALL@
+INSTALL_PROGRAM					=	@INSTALL_PROGRAM@
+INSTALL_DATA					=	@INSTALL_DATA@
+INSTALL_PROTECTED_DATA			=	@INSTALL_PROGRAM@ -m 600
+INSTALL_SCRIPT					=	@INSTALL_SCRIPT@
+INSTALL_PROTECTED_APP			=	@INSTALL_PROGRAM@ -m 700
+
+prefix							=	@prefix@
+exec_prefix						=	@exec_prefix@
+srcdir							=	@srcdir@
+top_srcdir						=	@top_srcdir@
+includedir						=	@includedir@
+libdir							=	@libdir@
+bindir							=	@bindir@
+libexecdir						=	@libexecdir@
+mandir							=	${prefix}/man/man3
+sysconfdir						=	@sysconfdir@
+top_builddir					=	.
+VPATH							=	@srcdir@
+
+BUILD_DLCOMPAT					=	@BUILD_DLCOMPAT@
+DLCOMPAT_SUBDIR					=	@DLCOMPAT_SUBDIR@
+
+SHELL							=	@SHELL@
+MAKE_INSTALL_DIRS				=	$(SHELL) $(top_srcdir)/conftools/mkinstalldirs
+
+############################################################################
+
+PROJECT_NAME					=	symagent
+
+############################################################################
+
+# Things
+
+EXE_OBJECTS						= 	main.lo \
+									agent-heartbeat.lo \
+									agent-utils.lo \
+									plugin-manager.lo
+
+#****************************************************************************
+#*																			*
+#*  Default and High-level Targets                                          *
+#*																			*
+#****************************************************************************
+
+.PHONY:					default
+.PHONY:					clean
+.PHONY:					distclean
+.PHONY:					configclean
+.PHONY:					dlcompat
+.PHONY:					all
+.PHONY:					install
+.PHONY:					install-startup-script
+.PHONY:					uninstall
+
+#----------------------------------------------------
+
+default:				all
+
+#----------------------------------------------------
+
+clean:					
+							rm -f $(PROJECT_NAME) core *.o *.lo
+							rm -rf .libs
+							rm -f startup_script/*.sh startup_script/mac_os_x/StartupParameters.plist startup_script/mac_os_x/mac_os_x
+							@if test "$(BUILD_DLCOMPAT)" = "yes"; then \
+								$(MAKE) --directory=$(DLCOMPAT_SUBDIR) clean; \
+							fi
+
+#----------------------------------------------------
+
+distclean:				clean
+							rm -f config.log config.status config.cache agent-config.h agent-config.h.in~
+							rm -f Makefile libtool
+							rm -rf autom4te.cache
+							@if test "$(BUILD_DLCOMPAT)" = "yes"; then \
+								rm -f $(DLCOMPAT_SUBDIR)/Makefile $(DLCOMPAT_SUBDIR)/config.status $(DLCOMPAT_SUBDIR)/config.log; \
+							fi
+
+#----------------------------------------------------
+						
+configclean:			distclean
+							rm -f aclocal.m4 configure
+							@if test "$(BUILD_DLCOMPAT)" = "yes"; then \
+								rm -f $(DLCOMPAT_SUBDIR)/configure; \
+							fi
+
+#----------------------------------------------------
+
+dlcompat:
+							@if test "$(BUILD_DLCOMPAT)" = "yes"; then \
+								$(MAKE) --directory=$(DLCOMPAT_SUBDIR) libdl.a; \
+							fi
+
+#----------------------------------------------------
+
+all:					$(PROJECT_NAME)
+
+#----------------------------------------------------
+
+$(PROJECT_NAME):		dlcompat \
+						$(EXE_OBJECTS)
+							$(LINK_EXE) $(EXE_OBJECTS) $(LIBS) $(OPTIONAL_OBJECTS)
+
+#----------------------------------------------------
+
+install:
+							$(MAKE_INSTALL_DIRS) $(bindir)
+							$(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL_PROTECTED_APP) $(PROJECT_NAME) $(bindir)/$(PROJECT_NAME)
+							$(LIBTOOL) $(LTFLAGS) --mode=finish $(bindir)/$(PROJECT_NAME)
+
+#----------------------------------------------------
+
+install-startup-script:
+									@-if test -d /etc/init.d; then \
+										if test -f /etc/init.d/runscript.sh; then \
+											$(INSTALL_PROGRAM) -m 755 startup_script/gentoo.sh /etc/init.d/$(PROJECT_NAME); \
+										else \
+											$(INSTALL_PROGRAM) -m 755 startup_script/linux.sh /etc/init.d/$(PROJECT_NAME); \
+										fi; \
+									else \
+										if test -d /etc/rc.d/init.d; then \
+											$(INSTALL_PROGRAM) -m 755 startup_script/linux.sh /etc/rc.d/init.d/$(PROJECT_NAME); \
+										else \
+											if test -d /Library/Receipts; then \
+												if test ! -d /Library/StartupItems; then \
+													$(INSTALL_MAKE_DIR) -m 775 /Library/StartupItems; \
+												fi; \
+												if test ! -d /Library/StartupItems/$(PROJECT_NAME); then \
+													$(INSTALL_MAKE_DIR) -m 775 /Library/StartupItems/$(PROJECT_NAME); \
+												fi; \
+												$(INSTALL_DATA) -m 664 startup_script/mac_os_x/StartupParameters.plist /Library/StartupItems/$(PROJECT_NAME)/; \
+												$(INSTALL_DATA) -m 775 startup_script/mac_os_x/mac_os_x /Library/StartupItems/$(PROJECT_NAME)/$(PROJECT_NAME); \
+											else \
+												if test -f /etc/rc.subr; then \
+													$(MAKE_INSTALL_DIRS) /usr/local/etc/rc.d; \
+													$(INSTALL_PROGRAM) -m 755 startup_script/freebsd.sh /usr/local/etc/rc.d/$(PROJECT_NAME); \
+												fi; \
+											fi; \
+										fi; \
+									fi
+
+#----------------------------------------------------
+
+uninstall:
+							$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(bindir)/$(PROJECT_NAME)
+
+############################################################################
+#
+#	Rules to build the object files
+#
+############################################################################
+
+main.lo:						main.cc \
+								main.h \
+								agent-config.h \
+								agent-defs.h \
+								agent-heartbeat.h \
+								agent-utils.h \
+								plugin-manager.h
+
+agent-heartbeat.lo:				agent-heartbeat.cc \
+								agent-heartbeat.h \
+								agent-config.h \
+								agent-defs.h \
+								agent-utils.h
+
+agent-utils.lo:					agent-utils.cc \
+								agent-utils.h \
+								agent-config.h \
+								agent-defs.h
+
+plugin-manager.lo:				plugin-manager.cc \
+								plugin-manager.h \
+								agent-config.h \
+								agent-defs.h \
+								agent-utils.h \
+								plugin-api.h
+
+############################################################################
+#
+#	Special targets
+#
+############################################################################
+
+.SUFFIXES: .cc .lo .o
+
+.cc.o:
+										$(COMPILE) -o $@ -c $<
+.cc.lo:
+										$(LTCOMPILE) -o $@ -c $<

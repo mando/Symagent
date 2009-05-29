@@ -1,0 +1,197 @@
+/* agent-config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Agent plugin directory prefix */
+#undef ABS_LIBEXECDIR
+
+/* The command used to configure this agent */
+#undef AGENT_CONFIGURE_COMMAND
+
+/* Agent version number */
+#undef AGENT_VERSION_NUMBER
+
+/* 1234 = LIL_ENDIAN, 4321 = BIGENDIAN */
+#undef BYTEORDER
+
+/* Define to 1 if you have the <algorithm> header file. */
+#undef HAVE_ALGORITHM
+
+/* Define to 1 if you have the <cctype> header file. */
+#undef HAVE_CCTYPE
+
+/* Define to 1 if you have the <cerrno> header file. */
+#undef HAVE_CERRNO
+
+/* Define to 1 if you have the <climits> header file. */
+#undef HAVE_CLIMITS
+
+/* Define to 1 if you have the <cmath> header file. */
+#undef HAVE_CMATH
+
+/* Define to 1 if you have the <csignal> header file. */
+#undef HAVE_CSIGNAL
+
+/* Define to 1 if you have the <cstdarg> header file. */
+#undef HAVE_CSTDARG
+
+/* Define to 1 if you have the <cstddef> header file. */
+#undef HAVE_CSTDDEF
+
+/* Define to 1 if you have the <cstdio> header file. */
+#undef HAVE_CSTDIO
+
+/* Define to 1 if you have the <cstdlib> header file. */
+#undef HAVE_CSTDLIB
+
+/* Define to 1 if you have the <cstring> header file. */
+#undef HAVE_CSTRING
+
+/* Define to 1 if you have the declaration of `RLIMIT_CORE', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_CORE
+
+/* Define to 1 if you have the declaration of `RLIMIT_CPU', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_CPU
+
+/* Define to 1 if you have the declaration of `RLIMIT_DATA', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_DATA
+
+/* Define to 1 if you have the declaration of `RLIMIT_FSIZE', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_FSIZE
+
+/* Define to 1 if you have the declaration of `RLIMIT_MEMLOCK', and to 0 if
+   you don't. */
+#undef HAVE_DECL_RLIMIT_MEMLOCK
+
+/* Define to 1 if you have the declaration of `RLIMIT_NOFILE', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_NOFILE
+
+/* Define to 1 if you have the declaration of `RLIMIT_NPROC', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_NPROC
+
+/* Define to 1 if you have the declaration of `RLIMIT_RSS', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_RSS
+
+/* Define to 1 if you have the declaration of `RLIMIT_STACK', and to 0 if you
+   don't. */
+#undef HAVE_DECL_RLIMIT_STACK
+
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the `getloadavg' function. */
+#undef HAVE_GETLOADAVG
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <iostream> header file. */
+#undef HAVE_IOSTREAM
+
+/* Define to 1 if you have the <libgen.h> header file. */
+#undef HAVE_LIBGEN_H
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <map> header file. */
+#undef HAVE_MAP
+
+/* Define to 1 if you have the <memory> header file. */
+#undef HAVE_MEMORY
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
+#undef HAVE_NDIR_H
+
+/* Define to 1 if you have the `readdir_r' function. */
+#undef HAVE_READDIR_R
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <string> header file. */
+#undef HAVE_STRING
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if you have the `sysinfo' function. */
+#undef HAVE_SYSINFO
+
+/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_DIR_H
+
+/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_NDIR_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysinfo.h> header file. */
+#undef HAVE_SYS_SYSINFO_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <vector> header file. */
+#undef HAVE_VECTOR
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Directory containing agent plugins */
+#undef PLUGIN_PATH
+
+/* Define to 1 if a super-user is required, 0 otherwise. */
+#undef REQUIRE_SUPER_USER
+
+/* The argument type for getrlimit/setrlimit */
+#undef RESOURCE_LIMIT_TYPE
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if this platform supports the dlopen() call and its friends,
+   and to 0 if it doesn't. */
+#undef USE_DLOPEN
+
+/* whether byteorder is bigendian */
+#undef WORDS_BIGENDIAN

@@ -1,0 +1,7 @@
+{
+  Description     = "Symbiot Agent: symagent";
+  Provides        = ("symagent");
+  Requires        = ("Network");
+  Uses            = ("Network");
+  OrderPreference = "Late";
+}

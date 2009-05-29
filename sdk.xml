@@ -1,0 +1,196 @@
+<agentsdk>
+
+<!-- library -->
+
+<component
+ name="library"
+ location="library"
+>
+<instance
+ name="libsymbiot"
+ location="."
+ enabled="true"
+/>
+
+<command
+ name="autoconf"
+ description="Generating configuration scripts"
+>
+autoheader || exit 1
+autoconf || exit 1
+</command>
+
+<command
+ name="configure"
+ description="Configuring"
+>
+./configure --prefix=$LIB_INSTALL_DIR --with-local-expat --with-optimize=3 --with-log-dir=$LOG_DIR --with-conf-dir=$CONF_DIR --with-server=$SERVERNAME || exit 1
+</command>
+
+<command
+ name="lib-compile"
+ description="Compiling"
+>
+make || exit 1
+</command>
+
+<command
+ name="lib-install"
+ description="Installing (requires root user)"
+>
+make install || exit 1
+</command>
+
+<command
+ name="clean"
+ description="Cleaning"
+>
+make distclean || exit 1
+</command>
+</component>
+
+
+<!-- agents -->
+
+<component
+ name="agent"
+ location="agents"
+>
+<instance
+ name="symagent"
+ location="symagent"
+ enabled="true"
+/>
+
+<command
+ name="autoconf"
+ description="Generating configuration scripts"
+>
+autoheader || exit 1
+autoconf || exit 1
+</command>
+
+<command
+ name="configure"
+ description="Configuring"
+>
+./configure --prefix=$AGENT_INSTALL_DIR --with-optimize=3 --with-libsymbiot-base-dir=$LIB_INSTALL_DIR || exit 1
+</command>
+
+<command
+ name="compile"
+ description="Compiling"
+>
+LD_RUN_PATH=$LIB_INSTALL_DIR/lib make || exit 1
+</command>
+
+<command
+ name="install"
+ description="Installing (requires root user)"
+>
+make install || exit 1
+</command>
+
+<command
+ name="clean"
+ description="Cleaning"
+>
+make distclean || exit 1
+</command>
+
+<command
+ name="script-install"
+ description="Installing startup scripts (requires root user)"
+>
+if test $INSTALL_STARTUP_SCRIPTS = 1; then
+    make install-startup-script || exit 1
+fi
+</command>
+</component>
+
+
+<!-- plugins -->
+
+<component
+ name="plugin"
+ location="agents/symagent/plugins"
+>
+<instance
+ name="effector"
+ location="effector"
+ enabled="true"
+/>
+<instance
+ name="log-watcher"
+ location="log-watcher"
+ enabled="true"
+/>
+<instance
+ name="mac-lookup"
+ location="mac-lookup"
+ enabled="true"
+/>
+<instance
+ name="network"
+ location="network"
+ enabled="true"
+/>
+<instance
+ name="nmap"
+ location="nmap"
+ enabled="true"
+/>
+<instance
+ name="processes"
+ location="processes"
+ enabled="true"
+/>
+<instance
+ name="snort-log"
+ location="snort-log"
+ enabled="true"
+/>
+<instance
+ name="tester"
+ location="tester"
+ enabled="true"
+/>
+
+<command
+ name="autoconf"
+ description="Generating configuration scripts"
+>
+autoheader || exit 1
+autoconf || exit 1
+</command>
+
+<command
+ name="configure"
+ description="Configuring"
+>
+./configure --prefix=$AGENT_INSTALL_DIR --with-optimize=3 --with-libsymbiot-base-dir=$LIB_INSTALL_DIR || exit 1
+</command>
+
+<command
+ name="compile"
+ description="Compiling"
+>
+LD_RUN_PATH=$LIB_INSTALL_DIR/lib make || exit 1
+</command>
+
+<command
+ name="install"
+ description="Installing (requires root user)"
+>
+make install || exit 1
+</command>
+
+<command
+ name="clean"
+ description="Cleaning"
+>
+make distclean || exit 1
+</command>
+</component>
+
+</agentsdk>

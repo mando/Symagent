@@ -1,0 +1,605 @@
+# @(#) $Header: /cvs/opensims/agent/library/Makefile.in,v 1.1 2004/07/15 06:46:27 paco Exp $ (LBL)
+#
+#  Copyright (c) 1993, 1994, 1995, 1996
+#       The Regents of the University of California.  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that: (1) source code distributions
+#  retain the above copyright notice and this paragraph in its entirety, (2)
+#  distributions including binary code include the above copyright notice and
+#  this paragraph in its entirety in the documentation or other materials
+#  provided with the distribution, and (3) all advertising materials mentioning
+#  features or use of this software display the following acknowledgement:
+#  ``This product includes software developed by the University of California,
+#  Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+#  the University nor the names of its contributors may be used to endorse
+#  or promote products derived from this software without specific prior
+#  written permission.
+#  THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+
+############################################################################
+#        SYMBIOT
+#
+#        Real-time Network Threat Modeling
+#        (C) 2002-2004 Symbiot, Inc.     --      ALL RIGHTS RESERVED
+#
+#        Symbiot Master Library
+#
+#        http://www.symbiot.com
+#
+############################################################################
+
+CXX								=	@CXX@
+CC								=	@CXX@
+LIBTOOL							=	@LIBTOOL@
+CXXFLAGS						=	@CXXFLAGS@ -Wall
+LDFLAGS							=	@LDFLAGS@
+VSNFLAG							=	-version-info @LIBCURRENT@:@LIBREVISION@:@LIBAGE@
+LTFLAGS							=	--silent
+LIBTOOL_DEPS					=	@LIBTOOL_DEPS@
+LIBS							=	@LIBS@
+INCLUDES						=	@INCLUDES@
+OPTIONAL_OBJECTS				=	@OPTIONAL_OBJECTS@
+
+COMPILE							=	$(CXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
+LTCOMPILE						=	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE)
+LINK_EXE						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) $(LDFLAGS) -o $@
+LINK_LIB						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -no-undefined $(VSNFLAG) -rpath $(libdir) $(LDFLAGS) -o $@
+
+INSTALL							=	@INSTALL@
+INSTALL_PROGRAM					=	@INSTALL_PROGRAM@
+INSTALL_DATA					=	@INSTALL_DATA@
+INSTALL_PROTECTED_DATA			=	@INSTALL_PROGRAM@ -m 600
+INSTALL_SCRIPT					=	@INSTALL_SCRIPT@
+
+prefix							=	@prefix@
+exec_prefix						=	@exec_prefix@
+srcdir							=	@srcdir@
+top_srcdir						=	@top_srcdir@
+includedir						=	@includedir@
+libdir							=	@libdir@
+mandir							=	${prefix}/man/man3
+sysconfdir						=	@sysconfdir@
+top_builddir					=	.
+VPATH							=	@srcdir@
+SYMBIOT_LOG_DIR_PREFIX			=	@SYMBIOT_LOG_DIR_PREFIX@
+
+CONF_DIR						=	@SYMBIOT_CONF_DIR_PREFIX@
+CERTS_DIR						=	$(CONF_DIR)/certs
+LOG_DIR							=	$(SYMBIOT_LOG_DIR_PREFIX)
+
+BUILD_EXPAT						=	@BUILD_EXPAT@
+EXPAT_SUBDIR					=	@EXPAT_SUBDIR@
+
+EXTERNAL_CA_CERT				=	@EXTERNAL_CA_CERT@
+EXTERNAL_AGENT_CERT				=	@EXTERNAL_AGENT_CERT@
+
+SHELL							=	@SHELL@
+MAKE_INSTALL_DIRS				=	$(SHELL) $(top_srcdir)/conftools/mkinstalldirs
+
+############################################################################
+
+LIBRARY_SHORT_NAME				=	symbiot
+LIBRARY							=	lib$(LIBRARY_SHORT_NAME).la
+
+############################################################################
+
+# Things
+
+LIB_OBJS						= 	symlib-api.lo \
+									symlib-app-exec.lo \
+									symlib-communicate.lo \
+									symlib-exception.lo \
+									symlib-expat.lo \
+									symlib-file.lo \
+									symlib-file-watch.lo \
+									symlib-message.lo \
+									symlib-mutex.lo \
+									symlib-prefs.lo \
+									symlib-ssl-cert.lo \
+									symlib-ssl-cipher.lo \
+									symlib-ssl-digest.lo \
+									symlib-ssl-encode.lo \
+									symlib-ssl-envelope.lo \
+									symlib-ssl-pkey.lo \
+									symlib-ssl-sign.lo \
+									symlib-ssl-tls.lo \
+									symlib-ssl-util.lo \
+									symlib-task-queue.lo \
+									symlib-tasks.lo \
+									symlib-tcp.lo \
+									symlib-threads.lo \
+									symlib-time.lo \
+									symlib-utils.lo \
+									symlib-xml.lo
+
+API_HEADERS						= 	symlib-api.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-message.h \
+									symlib-mutex.h \
+									symlib-tasks.h \
+									symlib-task-queue.h
+
+############################################################################
+#
+#	Default and High-level Targets
+#
+############################################################################
+
+.PHONY:					default
+.PHONY:					clean
+.PHONY:					distclean
+.PHONY:					configclean
+.PHONY:					all
+.PHONY:					buildlib
+.PHONY:					installlib
+.PHONY:					installheaders
+.PHONY:					installconf
+.PHONY:					installcerts
+.PHONY:					install
+.PHONY:					uninstalllib
+.PHONY:					uninstallheaders
+.PHONY:					uninstallconf
+.PHONY:					uninstallcerts
+.PHONY:					uninstall
+
+#----------------------------------------------------
+
+default:				all
+
+#----------------------------------------------------
+
+clean:					
+							rm -f $(LIBRARY) core *.o *.lo
+							rm -rf .libs
+							@if test "$(BUILD_EXPAT)" = "yes"; then \
+								cd $(EXPAT_SUBDIR) && $(MAKE) clean; \
+							fi
+
+#----------------------------------------------------
+
+distclean:				clean
+							rm -f config.log config.status config.cache symlib-config.h symlib-config.h.in~
+							rm -f Makefile libtool
+							rm -rf autom4te.cache
+							@if test "$(BUILD_EXPAT)" = "yes"; then \
+								cd $(EXPAT_SUBDIR) && $(MAKE) distclean; \
+							fi
+
+#----------------------------------------------------
+
+configclean:			distclean
+							rm -f aclocal.m4 configure
+							@if test "$(BUILD_EXPAT)" = "yes"; then \
+								cd $(EXPAT_SUBDIR) && $(MAKE) extraclean; \
+							fi
+
+#----------------------------------------------------
+
+expat:
+							@if test "$(BUILD_EXPAT)" = "yes"; then \
+								cd $(EXPAT_SUBDIR) && $(MAKE) libexpat.la; \
+							fi
+
+#----------------------------------------------------
+
+all:					expat \
+						$(LIBRARY)
+
+#----------------------------------------------------
+
+buildlib:				expat \
+						$(LIBRARY)
+
+#----------------------------------------------------
+
+installlib:
+							$(MAKE_INSTALL_DIRS) $(libdir) $(LOG_DIR)
+							$(LIBTOOL) --mode=install $(INSTALL) $(LIBRARY) $(libdir)/$(LIBRARY)
+
+#----------------------------------------------------
+
+installheaders:			$(API_HEADERS)
+							$(MAKE_INSTALL_DIRS) $(includedir)
+							$(INSTALL_DATA) $(API_HEADERS) $(includedir)
+
+#----------------------------------------------------
+
+installconf:
+							$(MAKE_INSTALL_DIRS) $(CONF_DIR)
+
+#----------------------------------------------------
+
+installcerts:
+							$(MAKE_INSTALL_DIRS) $(CERTS_DIR)
+							@if test ! -e $(CERTS_DIR)/cacert.pem; then \
+								if test -n "$(EXTERNAL_CA_CERT)"; then \
+									echo Installing alternate CA certificate; \
+									$(INSTALL_PROTECTED_DATA) $(EXTERNAL_CA_CERT) $(CERTS_DIR)/cacert.pem; \
+								else \
+									echo Installing included CA certificate; \
+									$(INSTALL_PROTECTED_DATA) default_conf/certs/cacert.pem $(CERTS_DIR); \
+								fi; \
+							fi
+							@if test ! -e $(CERTS_DIR)/agent.pem; then \
+								if test -n "$(EXTERNAL_AGENT_CERT)"; then \
+									echo Installing alternate unprovisioned agent certificate; \
+									$(INSTALL_PROTECTED_DATA) $(EXTERNAL_AGENT_CERT) $(CERTS_DIR)/agent.pem; \
+								else \
+									echo Installing included unprovisioned agent certificate; \
+									$(INSTALL_PROTECTED_DATA) default_conf/certs/agent.pem $(CERTS_DIR); \
+								fi; \
+							fi
+
+#----------------------------------------------------
+
+install:				installlib \
+						installheaders \
+						installconf \
+						installcerts
+
+#----------------------------------------------------
+
+uninstalllib:
+							$(LIBTOOL) --mode=uninstall rm -f $(libdir)/$(LIBRARY)
+
+#----------------------------------------------------
+
+uninstallheaders:
+							for x in $(API_HEADERS); do \
+								rm -f $(includedir)/$$x; \
+							done
+
+#----------------------------------------------------
+
+uninstallcerts:
+							rm -f $(CERTS_DIR)/agent.pem
+							rm -f $(CERTS_DIR)/cacert.pem
+
+#----------------------------------------------------
+
+uninstall:				uninstalllib \
+						uninstallheaders \
+						uninstallconf \
+						uninstallcerts
+
+#----------------------------------------------------
+
+libtool:				$(LIBTOOL_DEPS)
+							$(SHELL) ./config.status --recheck
+
+#----------------------------------------------------
+
+$(LIBRARY):				$(LIB_OBJS)
+							$(LINK_LIB) $(LIB_OBJS) $(LIBS) $(OPTIONAL_OBJECTS)
+
+############################################################################
+#
+#	Rules to build the object files
+#
+############################################################################
+
+symlib-api.lo:						symlib-api.cc \
+									symlib-api.h \
+									symlib-app-exec.h \
+									symlib-communicate.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-expat.h \
+									symlib-file.h \
+									symlib-file-watch.h \
+									symlib-message.h \
+									symlib-mutex.h \
+									symlib-prefs.h \
+									symlib-ssl-cert.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-encode.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-tls.h \
+									symlib-ssl-util.h \
+									symlib-task-queue.h \
+									symlib-tasks.h \
+									symlib-tcp.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h \
+									symlib-xml.h
+
+symlib-app-exec.lo:					symlib-app-exec.cc \
+									symlib-app-exec.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-tasks.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-communicate.lo:				symlib-communicate.cc \
+									symlib-communicate.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-expat.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-prefs.h \
+									symlib-ssl-cert.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-tls.h \
+									symlib-ssl-util.h \
+									symlib-tcp.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h \
+									symlib-xml.h
+
+symlib-exception.lo:				symlib-exception.cc \
+									symlib-exception.h \
+									symlib-config.h \
+									symlib-utils.h
+
+symlib-expat.lo:					symlib-expat.cc \
+									symlib-expat.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-file.lo:						symlib-file.cc \
+									symlib-file.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-mutex.h \
+									symlib-time.h \
+									symlib-threads.h \
+									symlib-utils.h
+
+symlib-file-watch.lo:				symlib-file-watch.cc \
+									symlib-file-watch.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-tasks.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-message.lo:					symlib-message.cc \
+									symlib-message.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-expat.h \
+									symlib-file.h \
+									symlib-time.h \
+									symlib-utils.h \
+									symlib-xml.h
+
+symlib-mutex.lo:					symlib-mutex.cc \
+									symlib-mutex.h \
+									symlib-exception.h
+
+symlib-prefs.lo:					symlib-prefs.cc \
+									symlib-prefs.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-expat.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h \
+									symlib-xml.h
+
+symlib-ssl-cipher.lo:				symlib-ssl-cipher.cc \
+									symlib-ssl-cipher.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-ssl-digest.lo:				symlib-ssl-digest.cc \
+									symlib-ssl-digest.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-ssl-encode.lo:				symlib-ssl-encode.cc \
+									symlib-ssl-encode.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-ssl-envelope.lo:				symlib-ssl-envelope.cc \
+									symlib-ssl-envelope.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-ssl-cert.lo:					symlib-ssl-cert.cc \
+									symlib-ssl-cert.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-ssl-pkey.lo:					symlib-ssl-pkey.cc \
+									symlib-ssl-pkey.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-ssl-sign.lo:					symlib-ssl-sign.cc \
+									symlib-ssl-sign.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-ssl-tls.lo:					symlib-ssl-tls.cc \
+									symlib-ssl-tls.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-cert.h \
+									symlib-ssl-cipher.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-pkey.h \
+									symlib-ssl-util.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-ssl-util.lo:					symlib-ssl-util.cc \
+									symlib-ssl-util.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-task-queue.lo:				symlib-task-queue.cc \
+									symlib-task-queue.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-tasks.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-tasks.lo:					symlib-tasks.cc \
+									symlib-tasks.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-tcp.lo:						symlib-tcp.cc \
+									symlib-tcp.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-threads.h \
+									symlib-time.h \
+									symlib-utils.h
+
+symlib-threads.lo:					symlib-threads.cc \
+									symlib-threads.h \
+									symlib-config.h \
+									symlib-exception.h \
+									symlib-mutex.h
+
+symlib-time.lo:						symlib-time.cc \
+									symlib-time.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h
+
+symlib-utils.lo:					symlib-utils.cc \
+									symlib-utils.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-file.h \
+									symlib-mutex.h \
+									symlib-ssl-digest.h \
+									symlib-ssl-encode.h \
+									symlib-ssl-util.h \
+									symlib-task-queue.h \
+									symlib-tasks.h \
+									symlib-threads.h \
+									symlib-time.h
+
+symlib-xml.lo:						symlib-xml.cc \
+									symlib-xml.h \
+									symlib-config.h \
+									symlib-defs.h \
+									symlib-exception.h \
+									symlib-expat.h \
+									symlib-file.h \
+									symlib-time.h \
+									symlib-utils.h
+
+############################################################################
+#
+#	Special targets
+#
+############################################################################
+
+.SUFFIXES: .cc .lo .o
+
+.cc.o:
+										$(COMPILE) -o $@ -c $<
+.cc.lo:
+										$(LTCOMPILE) -o $@ -c $<

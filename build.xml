@@ -1,0 +1,375 @@
+<project
+ name="AgentSDK"
+ default="build"
+ basedir="."
+>
+
+<!--
+@LICENSE@
+
+Dan CAMPER dan@bti.net
+Paco NATHAN paco@symbiot.com
+Matt BRADBURY bradbury@symbiot.com
+ -->
+
+<description>
+$Id: build.xml 144 2008-11-10 16:38:44Z mando $
+
+AgentSDK - build script
+
+A typical installation target sequence would be:
+
+	ant -v install-opensims | tee install.txt
+
+Then subsequent recompiles would be:
+
+	ant build
+
+If you run a "clean", you will need to:
+
+	ant configure build
+
+</description>
+
+
+<!-- ######################################################################
+		global properties
+     ###################################################################### -->
+
+<property
+ name="build.dir"
+ location="../build"
+/>
+<import
+ file="${build.dir}/properties.xml"
+/>
+
+<property
+ name="shell.script"
+ location="Build.sh"
+/>
+
+
+<!-- ######################################################################
+		setup tasks
+     ###################################################################### -->
+
+<target
+ name="gen_make"
+ description="customize the shell script used for managing the SDK"
+>
+<tempfile
+ property="out.sh"
+ destdir="${temp.dir}"
+ prefix="temp"
+ suffix=".sh"
+/>
+
+<xslt
+ in="${basedir}/sdk.xml"
+ out="${out.sh}"
+ style="template/Build.xsl"
+ force="true"
+ reloadstylesheet="true"
+/>
+
+<replace
+ file="${out.sh}"
+>
+<replacefilter
+ token="@BUILD.TAG@"
+ value="${build.tag}"
+/>
+<replacefilter
+ token="@SYMAGENT.LIB@"
+ value="${symagent.lib}"
+/>
+<replacefilter
+ token="@LOG.DIR@"
+ value="${log.dir}"
+/>
+<replacefilter
+ token="@CONFIG.BASEDIR@"
+ value="${config.basedir}"
+/>
+<replacefilter
+ token="@FQDN@"
+ value="${fqdn}"
+/>
+</replace>
+
+<move
+ file="${out.sh}"
+ tofile="${shell.script}"
+/>
+</target>
+
+
+<target
+ name="set_perms"
+ description="fix the file permissions for executable scripts"
+>
+<chmod
+ file="${shell.script}"
+ type="file"
+ perm="755"
+/>
+
+<chmod
+ type="file"
+ perm="755"
+>
+<fileset
+ dir="${basedir}"
+>
+<include
+ name="**/configure"
+/>
+</fileset>
+</chmod>
+</target>
+
+
+<target
+ name="autoconf"
+ description="use the generated shell script to create './configure' scripts, recursively"
+ depends="gen_make,set_perms"
+>
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="autoconf"
+/>
+</exec>
+</target>
+
+
+<target
+ name="configure"
+ description="use the generated './configure' scripts to create 'Makefile' scripts, recursively"
+ depends="gen_make,set_perms"
+>
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="configure"
+/>
+</exec>
+</target>
+
+
+<!-- ######################################################################
+		install tasks
+     ###################################################################### -->
+
+<target
+ name="gen_config"
+ description="customize and install the required configuration files"
+>
+<tempfile
+ property="out.xml"
+ destdir="${temp.dir}"
+ prefix="temp"
+ suffix=".xml"
+/>
+
+<xslt
+ in="${ifconfig.file}"
+ out="${out.xml}"
+ style="template/symagent_config.xsl"
+ force="true"
+ reloadstylesheet="true"
+>
+<param
+ name="config_basedir"
+ expression="${config.basedir}"
+/>
+<param
+ name="log_dir"
+ expression="${log.dir}"
+/>
+<param
+ name="webapp_name"
+ expression="${webapp.name}"
+/>
+<param
+ name="agent_port"
+ expression="${agent.port}"
+/>
+</xslt>
+</target>
+
+
+<target
+ name="install_config"
+ description="configure for both libsymbiot and the agents/plugins"
+ depends="gen_config"
+>
+<move
+ file="${out.xml}"
+ tofile="${symagent.config}"
+/>
+
+<chmod
+ file="${symagent.config}"
+ type="file"
+ perm="0600"
+/>
+<chown
+ file="${symagent.config}"
+ type="file"
+ owner="${super.user}"
+/>
+<chgrp
+ file="${symagent.config}"
+ type="file"
+ group="${super.group}"
+/>
+</target>
+
+
+<!-- ######################################################################
+		build tasks
+     ###################################################################### -->
+
+<target
+ name="clean"
+ description="run the makefile 'configclean' targets to delete generated files, recursively"
+ depends="gen_make,set_perms"
+>
+<delete
+ includeEmptyDirs="true"
+ quiet="true"
+>
+<fileset
+ dir="${basedir}"
+ includes="**/*~"
+ defaultExcludes="no"
+/>
+<fileset
+ dir="${basedir}/agents/symagent/"
+ includes="symagent"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/*.o"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/*.lo"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/*.so"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/*.a"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/*.la"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/.libs"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/autom4te.cache/*"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/core"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/core.[0-9]+"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/config.log"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/config.status"
+/>
+<fileset
+ dir="${basedir}"
+ includes="**/libtool"
+/>
+</delete>
+
+<exec
+ executable="${shell.script}"
+ failifexecutionfails="false"
+>
+<arg
+ line="clean"
+/>
+</exec>
+
+<delete
+ file="${shell.script}"
+ failonerror="false"
+/>
+</target>
+
+
+<target
+ name="build"
+ description="compile and install for the libraries, agents, plugins, and start scripts"
+ depends="gen_make,set_perms"
+>
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="lib-compile"
+/>
+</exec>
+
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="lib-install"
+/>
+</exec>
+
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="compile"
+/>
+</exec>
+
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="install"
+/>
+</exec>
+
+<exec
+ executable="${shell.script}"
+>
+<arg
+ line="script-install"
+/>
+</exec>
+</target>
+
+
+<target
+ name="install-opensims"
+ depends="install_config,configure,build"
+ description="top-level target for installing an OpenSIMS distribution"
+/>
+
+
+</project>

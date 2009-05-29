@@ -1,0 +1,257 @@
+/* plugin-config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* 1234 = LIL_ENDIAN, 4321 = BIGENDIAN */
+#undef BYTEORDER
+
+/* Define to 1 if you have the <algorithm> header file. */
+#undef HAVE_ALGORITHM
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
+/* Define to 1 if you have the <cctype> header file. */
+#undef HAVE_CCTYPE
+
+/* Define to 1 if you have the <cerrno> header file. */
+#undef HAVE_CERRNO
+
+/* Define to 1 if you have the <climits> header file. */
+#undef HAVE_CLIMITS
+
+/* Define to 1 if you have the <cmath> header file. */
+#undef HAVE_CMATH
+
+/* Define to 1 if you have the <csignal> header file. */
+#undef HAVE_CSIGNAL
+
+/* Define to 1 if you have the <cstdarg> header file. */
+#undef HAVE_CSTDARG
+
+/* Define to 1 if you have the <cstddef> header file. */
+#undef HAVE_CSTDDEF
+
+/* Define to 1 if you have the <cstdio> header file. */
+#undef HAVE_CSTDIO
+
+/* Define to 1 if you have the <cstdlib> header file. */
+#undef HAVE_CSTDLIB
+
+/* Define to 1 if you have the <cstring> header file. */
+#undef HAVE_CSTRING
+
+/* Define to 1 if you have the declaration of `AF_INET6', and to 0 if you
+   don't. */
+#undef HAVE_DECL_AF_INET6
+
+/* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_DIRENT_H
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Define to 1 if you have the <fcntl.h> header file. */
+#undef HAVE_FCNTL_H
+
+/* Define to 1 if you have the <fnmatch.h> header file. */
+#undef HAVE_FNMATCH_H
+
+/* Define to 1 if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define to 1 if you have the <iostream> header file. */
+#undef HAVE_IOSTREAM
+
+/* Define to 1 if you have the <kvm.h> header file. */
+#undef HAVE_KVM_H
+
+/* Define to 1 if you have the `iphlpapi' library (-liphlpapi). */
+#undef HAVE_LIBIPHLPAPI
+
+/* Define to 1 if you have the `pthread' library (-lpthread). */
+#undef HAVE_LIBPTHREAD
+
+/* Define to 1 if you have the `ws2_32' library (-lws2_32). */
+#undef HAVE_LIBWS2_32
+
+/* Define to 1 if you have the `wsock32' library (-lwsock32). */
+#undef HAVE_LIBWSOCK32
+
+/* Define to 1 if you have the `z' library (-lz). */
+#undef HAVE_LIBZ
+
+/* Define to 1 if you have the <map> header file. */
+#undef HAVE_MAP
+
+/* Define to 1 if you have the <memory> header file. */
+#undef HAVE_MEMORY
+
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
+#undef HAVE_NDIR_H
+
+/* Define to 1 if you have the <netinet/in.h> header file. */
+#undef HAVE_NETINET_IN_H
+
+/* Define to 1 if you have the <netinet/in_pcb.h> header file. */
+#undef HAVE_NETINET_IN_PCB_H
+
+/* Define to 1 if you have the <netinet/in_systm.h> header file. */
+#undef HAVE_NETINET_IN_SYSTM_H
+
+/* Define to 1 if you have the <netinet/ip.h> header file. */
+#undef HAVE_NETINET_IP_H
+
+/* Define to 1 if you have the <netinet/ip_var.h> header file. */
+#undef HAVE_NETINET_IP_VAR_H
+
+/* Define to 1 if you have the <netinet/tcpip.h> header file. */
+#undef HAVE_NETINET_TCPIP_H
+
+/* Define to 1 if you have the <netinet/tcp.h> header file. */
+#undef HAVE_NETINET_TCP_H
+
+/* Define to 1 if you have the <netinet/tcp_seq.h> header file. */
+#undef HAVE_NETINET_TCP_SEQ_H
+
+/* Define to 1 if you have the <netinet/tcp_var.h> header file. */
+#undef HAVE_NETINET_TCP_VAR_H
+
+/* Define to 1 if you have the <net/route.h> header file. */
+#undef HAVE_NET_ROUTE_H
+
+/* Define to 1 if you have the `readdir_r' function. */
+#undef HAVE_READDIR_R
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#undef HAVE_STDINT_H
+
+/* Define to 1 if you have the <stdlib.h> header file. */
+#undef HAVE_STDLIB_H
+
+/* Define to 1 if you have the <string> header file. */
+#undef HAVE_STRING
+
+/* Define to 1 if you have the <strings.h> header file. */
+#undef HAVE_STRINGS_H
+
+/* Define to 1 if you have the <string.h> header file. */
+#undef HAVE_STRING_H
+
+/* Define to 1 if `kp_eproc' is member of `struct kinfo_proc'. */
+#undef HAVE_STRUCT_KINFO_PROC_KP_EPROC
+
+/* Define to 1 if `kp_proc' is member of `struct kinfo_proc'. */
+#undef HAVE_STRUCT_KINFO_PROC_KP_PROC
+
+/* Define to 1 if `sin6_len' is member of `struct sockaddr_in6'. */
+#undef HAVE_STRUCT_SOCKADDR_IN6_SIN6_LEN
+
+/* Define to 1 if `sin_len' is member of `struct sockaddr_in'. */
+#undef HAVE_STRUCT_SOCKADDR_IN_SIN_LEN
+
+/* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_DIR_H
+
+/* Define to 1 if you have the <sys/domain.h> header file. */
+#undef HAVE_SYS_DOMAIN_H
+
+/* Define to 1 if you have the <sys/filedesc.h> header file. */
+#undef HAVE_SYS_FILEDESC_H
+
+/* Define to 1 if you have the <sys/file.h> header file. */
+#undef HAVE_SYS_FILE_H
+
+/* Define to 1 if you have the <sys/ndir.h> header file, and it defines `DIR'.
+   */
+#undef HAVE_SYS_NDIR_H
+
+/* Define to 1 if you have the <sys/param.h> header file. */
+#undef HAVE_SYS_PARAM_H
+
+/* Define to 1 if you have the <sys/proc.h> header file. */
+#undef HAVE_SYS_PROC_H
+
+/* Define to 1 if you have the <sys/protosw.h> header file. */
+#undef HAVE_SYS_PROTOSW_H
+
+/* Define to 1 if you have the <sys/queue.h> header file. */
+#undef HAVE_SYS_QUEUE_H
+
+/* Define to 1 if you have the <sys/socketvar.h> header file. */
+#undef HAVE_SYS_SOCKETVAR_H
+
+/* Define to 1 if you have the <sys/socket.h> header file. */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define to 1 if you have the <sys/stat.h> header file. */
+#undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/sysctl.h> header file. */
+#undef HAVE_SYS_SYSCTL_H
+
+/* Define to 1 if you have the <sys/types.h> header file. */
+#undef HAVE_SYS_TYPES_H
+
+/* Define to 1 if you have the <sys/ucred.h> header file. */
+#undef HAVE_SYS_UCRED_H
+
+/* Define to 1 if you have the <sys/user.h> header file. */
+#undef HAVE_SYS_USER_H
+
+/* Define to 1 if you have the <sys/vnode.h> header file. */
+#undef HAVE_SYS_VNODE_H
+
+/* Define to 1 if you have the <unistd.h> header file. */
+#undef HAVE_UNISTD_H
+
+/* Define to 1 if you have the <vector> header file. */
+#undef HAVE_VECTOR
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* The command used to configure this plugin */
+#undef PLUGIN_CONFIGURE_COMMAND
+
+/* Plugin version number */
+#undef PLUGIN_VERSION_NUMBER
+
+/* The name of this agent plugin */
+#undef PROJECT_SHORT_NAME
+
+/* Define to 1 if you have the ANSI C header files. */
+#undef STDC_HEADERS
+
+/* Define to 1 if we should use our own 'struct file' definition in FreeBSD, 0
+   otherwise */
+#undef USE_INLINE_FREEBSD_FILE_STRUCT
+
+/* Define to 1 if this platform tracks processes via the KVM interface, 0
+   otherwise. */
+#undef USE_KVM_PROC
+
+/* Define to 1 if this platform tracks processes via a /proc file system
+   structure, 0 otherwise */
+#undef USE_PROC_FS
+
+/* Define to 1 if this is a Cygwin platform, 0 otherwise */
+#undef USE_WINDOWS
+
+/* whether byteorder is bigendian */
+#undef WORDS_BIGENDIAN

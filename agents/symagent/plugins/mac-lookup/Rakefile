@@ -1,0 +1,43 @@
+namespace :maclookup do
+
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap maclookup"
+    task :bootstrap do
+        puts "===> Bootstrapping - plugin: maclookup..."
+        ['maclookup:configure', 'maclookup:build', 'maclookup:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "===> Bootstrapping - plugin: maclookup... done"
+    
+    end
+
+    desc "Configure maclookup"
+    task :configure do
+        puts "===> Configuring - plugin: maclookup..."
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}"
+        puts "===> Configuring - plugin: maclookup... done"
+    end
+
+    desc "Build maclookup"
+    task :build do
+        puts "===> Compiling - plugin: maclookup..."
+        sh "cd #{cwd} && make"
+        puts "===> Compiling - plugin: maclookup... done"
+    end
+    
+    desc "Clean maclookup"
+    task :clean do
+        puts "===> Cleaning - plugin: maclookup..."
+        sh "cd #{cwd} && make distclean"
+        puts "===> Cleaning - plugin: maclookup... done"
+    end
+    
+    desc "Install maclookup"
+    task :install do
+        puts "===> Installing - plugin: maclookup..."
+        sh "cd #{cwd} && make install"
+        puts "===> Installing - plugin: maclookup... done"
+    end
+
+end

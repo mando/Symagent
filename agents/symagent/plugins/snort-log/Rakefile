@@ -1,0 +1,43 @@
+namespace :snortlog do
+
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap snortlog"
+    task :bootstrap do
+        puts "===> Bootstrapping - plugin: snortlog..."
+        ['snortlog:configure', 'snortlog:build', 'snortlog:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "===> Bootstrapping - plugin: snortlog... done"
+    
+    end
+
+    desc "Configure snortlog"
+    task :configure do
+        puts "===> Configuring - plugin: snortlog..."
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}"
+        puts "===> Configuring - plugin: snortlog... done"
+    end
+
+    desc "Build snortlog"
+    task :build do
+        puts "===> Compiling - plugin: snortlog..."
+        sh "cd #{cwd} && make"
+        puts "===> Compiling - plugin: snortlog... done"
+    end
+    
+    desc "Clean snortlog"
+    task :clean do
+        puts "===> Cleaning - plugin: snortlog..."
+        sh "cd #{cwd} && make distclean"
+        puts "===> Cleaning - plugin: snortlog... done"
+    end
+    
+    desc "Install snortlog"
+    task :install do
+        puts "===> Installing - plugin: snortlog..."
+        sh "cd #{cwd} && make install"
+        puts "===> Installing - plugin: snortlog... done"
+    end
+
+end

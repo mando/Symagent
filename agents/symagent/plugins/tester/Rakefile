@@ -1,0 +1,43 @@
+namespace :tester do
+
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap tester"
+    task :bootstrap do
+        puts "===> Bootstrapping - plugin: tester..."
+        ['tester:configure', 'tester:build', 'tester:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "===> Bootstrapping - plugin: tester... done"
+    
+    end
+
+    desc "Configure tester"
+    task :configure do
+        puts "===> Configuring - plugin: tester..."
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}"
+        puts "===> Configuring - plugin: tester... done"
+    end
+
+    desc "Build tester"
+    task :build do
+        puts "===> Compiling - plugin: tester..."
+        sh "cd #{cwd} && make"
+        puts "===> Compiling - plugin: tester... done"
+    end
+    
+    desc "Clean tester"
+    task :clean do
+        puts "===> Cleaning - plugin: tester..."
+        sh "cd #{cwd} && make distclean"
+        puts "===> Cleaning - plugin: tester... done"
+    end
+    
+    desc "Install tester"
+    task :install do
+        puts "===> Installing - plugin: tester..."
+        sh "cd #{cwd} && make install"
+        puts "===> Installing - plugin: tester... done"
+    end
+
+end

@@ -1,0 +1,175 @@
+# @(#) $Header: /cvs/opensims/agent/agents/symagent/plugins/effector/Makefile.in,v 1.1 2004/07/15 06:45:57 paco Exp $ (LBL)
+#
+#  Copyright (c) 1993, 1994, 1995, 1996
+#       The Regents of the University of California.  All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that: (1) source code distributions
+#  retain the above copyright notice and this paragraph in its entirety, (2)
+#  distributions including binary code include the above copyright notice and
+#  this paragraph in its entirety in the documentation or other materials
+#  provided with the distribution, and (3) all advertising materials mentioning
+#  features or use of this software display the following acknowledgement:
+#  ``This product includes software developed by the University of California,
+#  Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+#  the University nor the names of its contributors may be used to endorse
+#  or promote products derived from this software without specific prior
+#  written permission.
+#  THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+#
+#
+
+############################################################################
+#        SYMBIOT
+#
+#        Real-time Network Threat Modeling
+#        (C) 2002-2004 Symbiot, Inc.     --      ALL RIGHTS RESERVED
+#
+#        Symbiot Master Library
+#
+#        http://www.symbiot.com
+#
+############################################################################
+
+CXX								=	@CXX@
+CC								=	@CXX@
+LIBTOOL							=	@LIBTOOL@
+CXXFLAGS						=	@CXXFLAGS@ -Wall
+LDFLAGS							=	@LDFLAGS@
+VSNFLAG							=	-version-info @PLUGINCURRENT@:@PLUGINREVISION@:@PLUGINAGE@
+LTFLAGS							=	--silent
+LIBS							=	@LIBS@
+INCLUDES						=	@INCLUDES@
+
+COMPILE							=	$(CXX) $(CXXFLAGS) $(DEFS) $(INCLUDES)
+LTCOMPILE						=	$(LIBTOOL) $(LTFLAGS) --mode=compile $(COMPILE)
+LINK_EXE						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -export-dynamic $(LDFLAGS) -o $@
+LINK_LIB						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -no-undefined $(VSNFLAG) -rpath $(libdir) $(LDFLAGS) -o $@
+LINK_PLUGIN						=	$(LIBTOOL) $(LTFLAGS) --mode=link $(COMPILE) -module -avoid-version -no-undefined $(VSNFLAG) -rpath $(libdir) $(LDFLAGS) -o $@
+
+INSTALL							=	@INSTALL@
+INSTALL_PROGRAM					=	@INSTALL_PROGRAM@
+INSTALL_DATA					=	@INSTALL_DATA@
+INSTALL_PROTECTED_DATA			=	@INSTALL_PROGRAM@ -m 600
+INSTALL_SCRIPT					=	@INSTALL_SCRIPT@
+INSTALL_PROTECTED_APP			=	@INSTALL_PROGRAM@ -m 700
+
+prefix							=	@prefix@
+exec_prefix						=	@exec_prefix@
+srcdir							=	@srcdir@
+top_srcdir						=	@top_srcdir@
+includedir						=	@includedir@
+libdir							=	@libdir@
+bindir							=	@bindir@
+libexecdir						=	@libexecdir@
+mandir							=	${prefix}/man/man3
+sysconfdir						=	@sysconfdir@
+top_builddir					=	.
+VPATH							=	@srcdir@
+INSTALLATION_DIR				=	$(bindir)/symagent-plugins
+
+SHELL							=	@SHELL@
+MAKE_INSTALL_DIRS				=	$(SHELL) $(top_srcdir)/conftools/mkinstalldirs
+
+############################################################################
+
+PROJECT_NAME_SHORT_NAME			=	@PROJECT_SHORT_NAME@
+PROJECT_NAME					=	$(PROJECT_NAME_SHORT_NAME).la
+
+############################################################################
+
+# Things
+
+MODULE_OBJECTS					= 	plugin-main.lo \
+									plugin-utils.lo
+
+#****************************************************************************
+#*																			*
+#*  Default and High-level Targets                                          *
+#*																			*
+#****************************************************************************
+
+.PHONY:					default
+.PHONY:					clean
+.PHONY:					distclean
+.PHONY:					configclean
+.PHONY:					all
+.PHONY:					install
+.PHONY:					uninstall
+
+#----------------------------------------------------
+
+default:				all
+
+#----------------------------------------------------
+
+clean:					
+							rm -f $(PROJECT_NAME) core *.o *.lo
+							rm -rf .libs
+
+#----------------------------------------------------
+
+distclean:				clean
+							rm -f config.log config.status config.cache plugin-config.h plugin-config.h.in~
+							rm -f Makefile libtool
+							rm -rf autom4te.cache
+
+#----------------------------------------------------
+						
+configclean:			distclean
+							rm -f aclocal.m4 configure
+
+#----------------------------------------------------
+
+all:					$(PROJECT_NAME)
+
+#----------------------------------------------------
+
+$(PROJECT_NAME):		$(MODULE_OBJECTS)
+							$(LINK_PLUGIN) $(MODULE_OBJECTS) $(LIBS)
+
+#----------------------------------------------------
+
+install:
+							$(MAKE_INSTALL_DIRS) $(INSTALLATION_DIR)
+							chmod 700 $(INSTALLATION_DIR)
+							$(LIBTOOL) $(LTFLAGS) --mode=install $(INSTALL_PROTECTED_APP) $(PROJECT_NAME) $(INSTALLATION_DIR)/$(PROJECT_NAME)
+							$(LIBTOOL) $(LTFLAGS) --mode=finish $(INSTALLATION_DIR)
+
+#----------------------------------------------------
+
+uninstall:
+							$(LIBTOOL) $(LTFLAGS) --mode=uninstall rm -f $(INSTALLATION_DIR)/$(PROJECT_NAME)
+
+############################################################################
+#
+#	Rules to build the object files
+#
+############################################################################
+
+plugin-main.lo:					plugin-main.cc \
+								plugin-main.h \
+								plugin-config.h \
+								plugin-defs.h \
+								plugin-utils.h
+
+plugin-utils.lo:				plugin-utils.cc \
+								plugin-utils.h \
+								plugin-config.h \
+								plugin-defs.h \
+								plugin-utils.h
+
+############################################################################
+#
+#	Special targets
+#
+############################################################################
+
+.SUFFIXES: .cc .lo .o
+
+.cc.o:
+										$(COMPILE) -o $@ -c $<
+.cc.lo:
+										$(LTCOMPILE) -o $@ -c $<

@@ -1,0 +1,43 @@
+namespace :libsymbiot do
+    
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap libsymbiot"
+    task :bootstrap do
+        puts "=> Bootstrapping - library: libsymbiot ..."
+        ['libsymbiot:configure', 'libsymbiot:build', 'libsymbiot:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "=> Bootstrapping - library: libsymbiot ... done"
+    end
+
+    desc "Configure libsymbiot"
+    task :configure do
+        puts "=> Configuring - library: libsymbiot ..."
+        
+        sh "cd #{cwd} && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-local-expat --with-optimize=3 --with-log-dir=#{$LOG_DIR} --with-conf-dir=#{$CONF_DIR} --with-server=#{$HOST_NAME}"
+        
+        puts "=> Configuring - library: libsymbiot ... done"
+    end
+    
+    desc "Build libsymbiot"
+    task :build do
+        puts "=> Compiling - library: libsymbiot ..."
+        sh "cd #{cwd} && make"
+        puts "=> Compiling - library: libsymbiot ... done"
+    end
+    
+    desc "Clean libsymbiot"
+    task :clean do
+        puts "=> Cleaning - library: libsymbiot ..."
+        sh "cd #{cwd} && make distclean"
+        puts "=> Cleaning - library: libsymbiot ... done"
+    end
+    
+    desc "Install libsymbiot"
+    task :install do
+        puts "=> Installing - library: libsymbiot ..."
+        sh "cd #{cwd} && make install"
+        puts "=> Installing - library: libsymbiot ... done"
+    end
+end

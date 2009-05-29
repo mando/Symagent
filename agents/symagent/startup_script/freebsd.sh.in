@@ -1,0 +1,46 @@
+#!/bin/sh
+
+# Symbiot Threat Profiler
+# local agent service control script
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+APP_DIR=@bindir@
+
+SYMAGENT_NAME=symagent
+
+LIBSYMBIOT_DIR=@LIBSYMBIOT_DIR@
+SYMAGENT_PATH=$APP_DIR/$SYMAGENT_NAME
+SYMAGENT_PID=@PID_DIR@/$SYMAGENT_NAME.pid
+
+RETVAL=0
+
+#----------------------------------------------------------
+
+case "$1" in
+
+start|restart|status)
+	LD_LIBRARY_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH $@
+	RETVAL=$?
+	;;
+
+stop)
+	LD_LIBRARY_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH $1
+	RETVAL=$?
+	;;
+
+condrestart)
+	if [ -f $SYMAGENT_PID ]; then
+		LD_LIBRARY_PATH=$LIBSYMBIOT_DIR $SYMAGENT_PATH restart
+		RETVAL=$?
+	fi
+	;;
+
+*)
+	echo "Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+	;;
+
+esac
+
+exit $RETVAL
