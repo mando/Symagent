@@ -14,6 +14,7 @@ bin
 etc
 include
 lib
+log
 library/expat-1.95.7/*
 symlib-config.h
 agents/symagent/startup_script/*
