@@ -108,5 +108,3 @@ special command-line option:
 
 That's it, by tailing the error and message log files, you should now
 be able to see the agent talking to the server.
-
-test change.
