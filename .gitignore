@@ -19,3 +19,4 @@ library/expat-1.95.7/*
 symlib-config.h
 agents/symagent/startup_script/*
 agents/symagent/symagent
+core.*
