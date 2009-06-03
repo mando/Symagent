@@ -624,7 +624,7 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 				
 				// Append login information to the message
 				nodeRef = loginMessage.Append(kMessageTypeValueLogin,"","");
-				nodeRef.AddAttribute(kMessageTagIPAddress,gServerObjPtr->LocalIPAddressAsString());
+				//nodeRef.AddAttribute(kMessageTagIPAddress,gServerObjPtr->LocalIPAddressAsString());
 				nodeRef.AddAttribute(kMessageTagClientSignature,gEnvironObjPtr->AppSignature());
 				
 				if (additionalLoginNode.IsValid())
@@ -845,7 +845,7 @@ ResponseCode SendToServer (TServerMessage& xmlData,
 			TLockedPthreadMutexObj		lock(gServerObjPtr->IOLock());
 			
 			// Add the current MAC address to the outbound message
-			xmlData.AddAttribute(kMessageTagMACAddress,gServerObjPtr->MyMACAddress());
+			//xmlData.AddAttribute(kMessageTagMACAddress,gServerObjPtr->MyMACAddress());
 			
 			if (gServerObjPtr->Send(xmlData.AsCompressedString(),compressionMode))
 			{
