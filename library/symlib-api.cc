@@ -619,17 +619,30 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 				TServerMessage		loginMessage;
 				TServerReply		reply;
 				TMessageNode		nodeRef;
-				
+                
+                TLoginDataNode      interfaceNode("INTERFACE_LIST");
+
 				gServerObjPtr->Connect();
 				
 				// Append login information to the message
 				nodeRef = loginMessage.Append(kMessageTypeValueLogin,"","");
 				//nodeRef.AddAttribute(kMessageTagIPAddress,gServerObjPtr->LocalIPAddressAsString());
 				nodeRef.AddAttribute(kMessageTagClientSignature,gEnvironObjPtr->AppSignature());
-				
-				if (additionalLoginNode.IsValid())
-					nodeRef.Append(additionalLoginNode);
-				
+		
+                // Append interface list information    
+                StdStringList interfaceList;
+                NetworkInterfaceList(interfaceList);
+                
+                for (StdStringList_const_iter x = interfaceList.begin(); x != interfaceList.end(); x++) {
+                    interfaceNode.Append("INTERFACE", "device", *x);
+                }
+
+                nodeRef.Append(interfaceNode);
+                    
+                if (additionalLoginNode.IsValid()) {
+                    nodeRef.Append(additionalLoginNode);
+                }
+			
 				// Perform the login protocol
 				try
 				{
