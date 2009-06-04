@@ -620,7 +620,7 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 				TServerReply		reply;
 				TMessageNode		nodeRef;
                 
-                TLoginDataNode      interfaceNode("INTERFACE_LIST");
+                TLoginDataNode      interfaceNode("NETWORK_LIST");
 
 				gServerObjPtr->Connect();
 				
@@ -635,6 +635,8 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
                 
                 for (StdStringList_const_iter x = interfaceList.begin(); x != interfaceList.end(); x++) {
                     interfaceNode.Append("INTERFACE", "device", *x);
+                    std::string mac_addr(LocalHostMACAddress(*x));
+                    interfaceNode.Append("MAC", "addr", mac_addr);
                 }
 
                 nodeRef.Append(interfaceNode);
