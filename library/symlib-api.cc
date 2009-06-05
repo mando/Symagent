@@ -629,25 +629,27 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 				//nodeRef.AddAttribute(kMessageTagIPAddress,gServerObjPtr->LocalIPAddressAsString());
 				nodeRef.AddAttribute(kMessageTagClientSignature,gEnvironObjPtr->AppSignature());
 		
-                // Append interface list information    
-                StdStringList interfaceList;
-                NetworkInterfaceList(interfaceList);
+        // Append interface list information    
+        StdStringList interfaceList;
+        NetworkInterfaceList(interfaceList);
                 
-                for (StdStringList_const_iter i = interfaceList.begin(); i != interfaceList.end(); i++) {
-                    TLoginDataNode netNode("NETWORK");
-                    netNode.AddAttribute("INTERFACE", *i);
-                    netNode.AddAttribute("MAC", LocalHostMACAddress(*i));
-                    //interfaceNode.Append("INTERFACE", "device", *x);
-                    //std::string mac_addr(LocalHostMACAddress(*x));
-                    //interfaceNode.Append("MAC", "addr", mac_addr);
-                    interfaceNode.Append(netNode);
-                }
+        for (StdStringList_const_iter i = interfaceList.begin(); i != interfaceList.end(); i++) {
+            TLoginDataNode netNode("NETWORK");
+            
+            netNode.AddAttribute("INTERFACE", *i);
+            netNode.AddAttribute("MAC", LocalHostMACAddress(*i));
+            netNode.AddAttribute("IP", LocalHostIPAddress(*i));
+            //interfaceNode.Append("INTERFACE", "device", *x);
+            //std::string mac_addr(LocalHostMACAddress(*x));
+            //interfaceNode.Append("MAC", "addr", mac_addr);
+            interfaceNode.Append(netNode);
+        }
 
-                nodeRef.Append(interfaceNode);
+        nodeRef.Append(interfaceNode);
                     
-                if (additionalLoginNode.IsValid()) {
-                    nodeRef.Append(additionalLoginNode);
-                }
+        if (additionalLoginNode.IsValid()) {
+            nodeRef.Append(additionalLoginNode);
+        }
 			
 				// Perform the login protocol
 				try

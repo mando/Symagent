@@ -29,7 +29,6 @@
 
 #include "symlib-exception.h"
 #include "symlib-threads.h"
-#include "symlib-utils.h"
 
 #include <cerrno>
 #include <cstdio>
@@ -431,12 +430,12 @@ bool TTCPConnectionObj::Idle ()
 unsigned long TTCPConnectionObj::LocalIPAddress () const
 {
 	unsigned long	localAddress = 0;
-	
-	if (IsConnected())
+
+  if (IsConnected())
 	{
 		struct sockaddr_in	sockInfo;
 		SOCKET_SIZE_TYPE	argSize = sizeof(sockInfo);
-		
+	
 		if (getsockname(fIOSocket,reinterpret_cast<struct sockaddr*>(&sockInfo),&argSize) < 0)
 			throw TSymLibErrorObj(errno,"While determining local IP address of the current connection");
 		
@@ -494,33 +493,37 @@ int TTCPConnectionObj::LocalPortNumber () const
 std::string TTCPConnectionObj::LocalInterfaceName () const
 {
 	std::string		interfaceName;
-	
+
 	if (IsConnected())
 	{
-		struct ifconf		ifc;
+		
+    struct ifconf		ifc;
 		struct ifreq		ifr;
 		struct ifreq*		ifrPtr = NULL;
 		struct ifreq*		ifrPtrEnd = NULL;
 		struct ifreq*		ifrPtrNext = NULL;
-		int					tempSocket;
-		const int			kIFCBufferSize = sizeof(ifr) * 64;
-		char				ifcBuffer[kIFCBufferSize];
-		unsigned long		myIPAddress = LocalIPAddress();
+		
+    int             tempSocket;
+    const int       kIFCBufferSize = sizeof(ifr) * 64;
+    char            ifcBuffer[kIFCBufferSize];
+    unsigned long   myIPAddress = LocalIPAddress();
 		
 		// Create a dummy socket to use for ioctl
 		tempSocket = socket(AF_INET,SOCK_DGRAM,0);
+
 		if (tempSocket < 0)
 			throw TSymLibErrorObj(errno,"While creating a temporary socket");
 		
 		// Get the configured interfaces in a struct
 		ifc.ifc_len = kIFCBufferSize;
 		ifc.ifc_buf = ifcBuffer;
+
 		if (ioctl(tempSocket,SIOCGIFCONF,&ifc) < 0)
 		{
 			close(tempSocket);
 			throw TSymLibErrorObj(errno,"While calling ioctl");
 		}
-		
+        
 		ifrPtr = ifc.ifc_req;
 		ifrPtrEnd = reinterpret_cast<struct ifreq*>((reinterpret_cast<char*>(ifrPtr) + ifc.ifc_len));
 		
@@ -539,7 +542,9 @@ std::string TTCPConnectionObj::LocalInterfaceName () const
 			
 			if (ifrPtr->ifr_addr.sa_family == AF_INET)
 			{
+                
 				strcpy(ifr.ifr_name,ifrPtr->ifr_name);
+                
 				if (ioctl(tempSocket,SIOCGIFFLAGS,&ifr) >= 0)
 				{
 					if ((ifr.ifr_flags & IFF_UP) == IFF_UP && (ifr.ifr_flags & IFF_LOOPBACK) != IFF_LOOPBACK)
@@ -548,7 +553,7 @@ std::string TTCPConnectionObj::LocalInterfaceName () const
 						{
 							struct sockaddr_in*		addressPtr = reinterpret_cast<struct sockaddr_in*>(&ifr.ifr_addr);
 							unsigned long			foundAddress = *(reinterpret_cast<unsigned long*>(&addressPtr->sin_addr));
-							
+						
 							if (foundAddress == myIPAddress)
 							{
 								interfaceName = ifrPtr->ifr_name;
@@ -575,12 +580,13 @@ std::string TTCPConnectionObj::LocalMACAddress () const
 {
 	std::string		macAddress;
 	
-	if (IsConnected())
+  if (IsConnected())
 	{
-		std::string		interfaceName(LocalInterfaceName());
-		
-		if (!interfaceName.empty())
+    std::string             interfaceName(LocalInterfaceName());
+    
+		if (!interfaceName.empty()) {
 			macAddress = LocalHostMACAddress(interfaceName);
+    }
 	}
 	
 	return macAddress;
@@ -1250,7 +1256,7 @@ unsigned long LocalHostInterfaceList (StdStringList& interfaceList)
 		close(tempSocket);
 		throw TSymLibErrorObj(errno,"While calling ioctl");
 	}
-	
+    
 	ifrPtr = ifc.ifc_req;
 	ifrPtrEnd = reinterpret_cast<struct ifreq*>((reinterpret_cast<char*>(ifrPtr) + ifc.ifc_len));
 	
@@ -1300,7 +1306,7 @@ unsigned long LocalHostMACAddressList (MACAddressMap& macAddressMap)
 	int					tempSocket;
 	const int			kIFCBufferSize = sizeof(ifr) * 64;
 	char				ifcBuffer[kIFCBufferSize];
-	
+
 	// Clear the argument list
 	macAddressMap.clear();
 	
@@ -1308,7 +1314,7 @@ unsigned long LocalHostMACAddressList (MACAddressMap& macAddressMap)
 	tempSocket = socket(AF_INET,SOCK_DGRAM,0);
 	if (tempSocket < 0)
 		throw TSymLibErrorObj(errno,"While creating a temporary socket");
-	
+
 	// Get the configured interfaces in a struct
 	ifc.ifc_len = kIFCBufferSize;
 	ifc.ifc_buf = ifcBuffer;
@@ -1317,7 +1323,7 @@ unsigned long LocalHostMACAddressList (MACAddressMap& macAddressMap)
 		close(tempSocket);
 		throw TSymLibErrorObj(errno,"While calling ioctl");
 	}
-	
+    
 	ifrPtr = ifc.ifc_req;
 	ifrPtrEnd = reinterpret_cast<struct ifreq*>((reinterpret_cast<char*>(ifrPtr) + ifc.ifc_len));
 	
@@ -1339,12 +1345,12 @@ unsigned long LocalHostMACAddressList (MACAddressMap& macAddressMap)
 			strcpy(ifr.ifr_name,ifrPtr->ifr_name);
 			if (ioctl(tempSocket,SIOCGIFFLAGS,&ifr) >= 0)
 			{
-				std::string		ifName(ifrPtr->ifr_name);
-				
 				if ((ifr.ifr_flags & IFF_UP) == IFF_UP && (ifr.ifr_flags & IFF_LOOPBACK) != IFF_LOOPBACK)
 				{
 					#if HAVE_DECL_SIOCGIFHWADDR
 						strcpy(ifr.ifr_name,ifrPtr->ifr_name);
+            std::string ifName(ifr.ifr_name);
+
 						if (ioctl(tempSocket,SIOCGIFHWADDR,&ifr) >= 0)
 						{
 							std::string		addressBuf(ifr.ifr_hwaddr.sa_data,ETHER_ADDR_LEN);
@@ -1525,6 +1531,95 @@ unsigned long GetAllHostAddresses (const std::string& hostName, NetworkAddressLi
 	return addressCount;
 }
 
+//---------------------------------------------------------------------
+// LocalHostIPMap
+//---------------------------------------------------------------------
+unsigned long LocalHostIPMap(IPAddressMap& ipAddressMap)
+{
+    struct ifconf		ifc;
+    struct ifreq		ifr;
+    struct ifreq*		ifrPtr = NULL;
+    struct ifreq*		ifrPtrEnd = NULL;
+    struct ifreq*		ifrPtrNext = NULL;
+    int					    tempSocket;
+    const int			  kIFCBufferSize = sizeof(ifr) * 64;
+    char				    ifcBuffer[kIFCBufferSize];
+
+    // Clear the argument list
+    ipAddressMap.clear();
+	
+    // Create a dummy socket to use for ioctl
+	  tempSocket = socket(AF_INET,SOCK_DGRAM,0);
+	  if (tempSocket < 0)
+		  throw TSymLibErrorObj(errno,"While creating a temporary socket");
+	
+    // Get the configured interfaces in a struct
+    ifc.ifc_len = kIFCBufferSize;
+    ifc.ifc_buf = ifcBuffer;
+    if (ioctl(tempSocket,SIOCGIFCONF,&ifc) < 0)
+    {
+      close(tempSocket);
+      throw TSymLibErrorObj(errno,"While calling ioctl");
+    }
+
+    ifrPtr = ifc.ifc_req;
+    ifrPtrEnd = reinterpret_cast<struct ifreq*>((reinterpret_cast<char*>(ifrPtr) + ifc.ifc_len));
+    
+    while (ifrPtr < ifrPtrEnd)
+	  {
+        #if HAVE_SOCKADDR_SA_LEN
+        unsigned int	nSize = ifrPtr->ifr_addr.sa_len + sizeof(ifrPtr->ifr_name);
+        
+        if (nSize < sizeof(struct ifreq))
+          ifrPtrNext = ifrPtr + 1;
+        else
+          ifrPtrNext = reinterpret_cast<struct ifreq*>(reinterpret_cast<char*>(ifrPtr) + nSize);
+        #else
+        ifrPtrNext = ifrPtr + 1;
+        #endif
+		
+        if (ifrPtr->ifr_addr.sa_family == AF_INET)
+        {
+            strcpy(ifr.ifr_name,ifrPtr->ifr_name);
+            
+            std::string ifName(ifrPtr->ifr_name);
+            
+            if (ioctl(tempSocket,SIOCGIFFLAGS,&ifr) >= 0)
+            {
+                if ((ifr.ifr_flags & IFF_UP) == IFF_UP && (ifr.ifr_flags & IFF_LOOPBACK) != IFF_LOOPBACK)
+                {
+                    if (ioctl(tempSocket,SIOCGIFADDR,&ifr) >= 0)
+                    {
+                    
+                        struct sockaddr_in*		addressPtr = reinterpret_cast<struct sockaddr_in*>(&ifr.ifr_addr);
+                        unsigned long			foundAddress = *(reinterpret_cast<unsigned long*>(&addressPtr->sin_addr));
+
+                        std::string ipAddress = IPAddressToString(foundAddress); 
+                        ipAddressMap[ifName] = ipAddress;
+                    }
+                }
+            }
+        }
+        ifrPtr = ifrPtrNext;
+    }
+    close(tempSocket);
+
+    return ipAddressMap.size();
+}
+//---------------------------------------------------------------------
+// LocalHostIPAddress
+//---------------------------------------------------------------------
+std::string LocalHostIPAddress (const std::string& interfaceName)
+{
+	
+  std::string		ipAddress;
+	IPAddressMap  ipAddressMap;
+
+  if (LocalHostIPMap(ipAddressMap) > 0) 
+    ipAddress = ipAddressMap[interfaceName];
+
+  return ipAddress;
+}
 //---------------------------------------------------------------------
 // End Environment
 //---------------------------------------------------------------------

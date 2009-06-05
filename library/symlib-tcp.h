@@ -30,6 +30,7 @@
 //---------------------------------------------------------------------
 #include "symlib-config.h"
 
+#include "symlib-utils.h"
 #include "symlib-defs.h"
 
 #include <netinet/in.h>
@@ -48,11 +49,15 @@ namespace symbiot {
 
 typedef		std::vector<unsigned long>						NetworkAddressList;
 typedef		NetworkAddressList::iterator					NetworkAddressList_iter;
-typedef		NetworkAddressList::const_iterator				NetworkAddressList__const_iter;
+typedef		NetworkAddressList::const_iterator    NetworkAddressList__const_iter;
 
-typedef		std::map<std::string,std::string>				MACAddressMap;
-typedef		MACAddressMap::iterator							MACAddressMap_iter;
-typedef		MACAddressMap::const_iterator					MACAddressMap_const_iter;
+typedef		std::map<std::string,std::string>     MACAddressMap;
+typedef		MACAddressMap::iterator               MACAddressMap_iter;
+typedef		MACAddressMap::const_iterator         MACAddressMap_const_iter;
+
+typedef		std::map<std::string,std::string>     IPAddressMap;
+typedef		IPAddressMap::iterator                IPAddressMap_iter;
+typedef		IPAddressMap::const_iterator          IPAddressMap_const_iter;
 
 //---------------------------------------------------------------------
 // Forward Class Declarations
@@ -378,6 +383,17 @@ unsigned long GetAllHostAddresses (const std::string& hostName, NetworkAddressLi
 	// addressList argument to contain a list of all associated IP
 	// addresses (in network byte order) for that host.  Returns
 	// the number of IP addresses in the list.
+
+unsigned long LocalHostIPMap (IPAddressMap& ipAddressMap);
+  // Function destructively modifies the argument to contain a map of
+  // interfaces and ip addresses .  The local loopback interface is 
+  // discarded.  The interface must be up to be includedin the list.  
+  // Returns the number of ip addresses.
+
+std::string LocalHostIPAddress (const std::string& interfaceName);
+  // Returns the ip address of the given interface name.  The returned ip address 
+  // is in the format XXX.XXX.XXX.XXX; an empty string is returned if the interface 
+  // is not found.
 
 //---------------------------------------------------------------------
 // End Environment
