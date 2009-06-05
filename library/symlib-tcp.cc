@@ -1620,6 +1620,37 @@ std::string LocalHostIPAddress (const std::string& interfaceName)
 
   return ipAddress;
 }
+
+//---------------------------------------------------------------------
+// LocalNetworkMask
+//---------------------------------------------------------------------
+unsigned long LocalNetworkMask (const std::string& interfaceName) 
+{
+  unsigned long	netMask = 0;
+	
+  struct ifreq	ifr;
+		
+  strcpy(ifr.ifr_name,interfaceName.c_str());
+		
+  int tempSocket = socket(AF_INET,SOCK_DGRAM,0);
+  
+  if (ioctl(tempSocket,SIOCGIFNETMASK,&ifr) >= 0)
+  {
+    struct sockaddr_in*	addressPtr = reinterpret_cast<struct sockaddr_in*>(&ifr.ifr_addr);
+			
+    netMask = *(reinterpret_cast<unsigned long*>(&addressPtr->sin_addr));
+  }
+	
+  return netMask;
+}
+
+//---------------------------------------------------------------------
+// LocalNetworkMaskAsString
+//---------------------------------------------------------------------
+std::string LocalNetworkMaskAsString (const std::string& interfaceName) 
+{
+    return IPAddressToString(LocalNetworkMask(interfaceName));
+}
 //---------------------------------------------------------------------
 // End Environment
 //---------------------------------------------------------------------

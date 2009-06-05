@@ -395,6 +395,16 @@ std::string LocalHostIPAddress (const std::string& interfaceName);
   // is in the format XXX.XXX.XXX.XXX; an empty string is returned if the interface 
   // is not found.
 
+unsigned long LocalNetworkMask (const std::string& interfaceName);
+  // Returns the network mask of the specified interface ("eth0").
+  // Note that there must be a connection for this to succeed; method returns zero 
+  // if no connection is present.
+		
+std::string LocalNetworkMaskAsString (const std::string& interfaceName);
+  // Returns the network mask of the specified interface ("eth0"). 
+  // Note that there must be a connection for this to succeed; method returns an 
+  // empty string if no connection is present.
+
 //---------------------------------------------------------------------
 // End Environment
 //---------------------------------------------------------------------

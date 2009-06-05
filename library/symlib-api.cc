@@ -639,6 +639,7 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
             netNode.AddAttribute("INTERFACE", *i);
             netNode.AddAttribute("MAC", LocalHostMACAddress(*i));
             netNode.AddAttribute("IP", LocalHostIPAddress(*i));
+            netNode.AddAttribute("NETMASK", LocalNetworkMaskAsString(*i));
             //interfaceNode.Append("INTERFACE", "device", *x);
             //std::string mac_addr(LocalHostMACAddress(*x));
             //interfaceNode.Append("MAC", "addr", mac_addr);
