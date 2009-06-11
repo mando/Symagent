@@ -13,7 +13,7 @@ load Rake::original_dir + '/agents/symagent/Rakefile'
 Dir[(Rake::original_dir + '/agents/symagent/plugins/*/Rakefile').to_s].each { |r| load r }
 
 # Project list
-projects = ['libsymbiot', 'symagent', 'effector', 'logwatcher', 'maclookup', 'network', 'nmap', 'processes']
+projects = ['libsymbiot', 'symagent', 'effector', 'logwatcher', 'maclookup', 'network', 'nmap', 'processes', 'snort_mysql']
 
 desc "Bootstrap *"
 task :bootstrap do
