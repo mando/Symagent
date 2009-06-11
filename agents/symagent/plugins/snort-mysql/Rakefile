@@ -1,0 +1,43 @@
+namespace :snort_mysql do
+
+    cwd = File.expand_path(File.dirname(__FILE__))
+
+    desc "Bootstrap snort_mysql"
+    task :bootstrap do
+        puts "===> Bootstrapping - plugin: snort_mysql..."
+        ['snort_mysql:configure', 'snort_mysql:build', 'snort_mysql:install'].each do |subtask|
+            Rake::Task[subtask].invoke
+        end
+        puts "===> Bootstrapping - plugin: snort_mysql... done"
+    
+    end
+
+    desc "Configure snort_mysql"
+    task :configure do
+        puts "===> Configuring - plugin: snort_mysql..."
+        sh "cd #{cwd} && autoconf && ./configure --prefix=#{$AGENT_INSTALL_DIR} --with-optimize=3 --with-libsymbiot-base-dir=#{$LIB_INSTALL_DIR}"
+        puts "===> Configuring - plugin: snort_mysql... done"
+    end
+
+    desc "Build snort_mysql"
+    task :build do
+        puts "===> Compiling - plugin: snort_mysql..."
+        sh "cd #{cwd} && make"
+        puts "===> Compiling - plugin: snort_mysql... done"
+    end
+    
+    desc "Clean snort_mysql"
+    task :clean do
+        puts "===> Cleaning - plugin: snort_mysql..."
+        sh "cd #{cwd} && make distclean"
+        puts "===> Cleaning - plugin: snort_mysql... done"
+    end
+    
+    desc "Install snort_mysql"
+    task :install do
+        puts "===> Installing - plugin: snort_mysql..."
+        sh "cd #{cwd} && make install"
+        puts "===> Installing - plugin: snort_mysql... done"
+    end
+
+end
