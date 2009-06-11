@@ -193,7 +193,7 @@ void TPlugin::AgentStop ()
 bool TPlugin::Load ()
 {
 	int			loadFlags = RTLD_NOW | RTLD_LOCAL;
-	
+
 	if (!fPath.empty())
 	{
 		try
@@ -272,6 +272,12 @@ bool TPlugin::Load ()
 				// Mark the plugin as fully loaded
 				fIsLoaded = true;
 			}
+      else {
+        string errString;
+        string dlopenError(dlerror());
+        errString = "dlopen failed in plugin at '" + fPath + "': " + dlopenError;
+        throw TSymLibErrorObj(kErrorPluginFunctionMissing,errString);
+      }
 		}
 		catch (TSymLibErrorObj& errObj)
 		{
@@ -374,10 +380,11 @@ bool TPluginMgr::LoadPlugins (const StdStringList& pluginPathList)
 		{
 			TPlugin*	pluginObjPtr = NULL;
 			string		pluginPath(*x);
-			
+  
 			try
 			{
 				pluginObjPtr = new TPlugin(pluginPath);
+      
 				if (pluginObjPtr)
 				{
 					if (pluginObjPtr->IsLoaded())
@@ -385,7 +392,7 @@ bool TPluginMgr::LoadPlugins (const StdStringList& pluginPathList)
 						// Add the plugin to our internal map if the name doesn't already exist
 						if (fPluginMap.find(pluginObjPtr->AgentName()) == fPluginMap.end())
 							fPluginMap[pluginObjPtr->AgentName()] = pluginObjPtr;
-						else
+            else
 							delete(pluginObjPtr);
 					}
 					else
@@ -552,7 +559,7 @@ void TPluginMgr::_GetPluginFilenames (PluginSigMap& pluginSigMap, bool throwOnEr
 						else if (fullPath[fullPath.length()-1] != '/')
 							fullPath += "/";
 						fullPath += dirEntry.d_name;
-						
+					
 						statResult = lstat(fullPath.c_str(),&statInfo);
 						
 						if (statResult == 0)
