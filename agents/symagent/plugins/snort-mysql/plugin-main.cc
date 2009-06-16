@@ -144,7 +144,7 @@ bool AgentInit (const TPreferenceNode& preferenceNode)
 //---------------------------------------------------------------------
 void GatherEvents (TServerMessage& messageObj)
 {
-    TMessageNode  eventListNode(messageObj.Append("EVENTS", "", ""));
+    TMessageNode  eventListNode(messageObj.Append("EVENT_LIST", "", ""));
 
     MYSQL       *conn;
     MYSQL_RES   *result;
@@ -166,7 +166,7 @@ void GatherEvents (TServerMessage& messageObj)
      * TODO: Figure out the right way to handle bad queries (try/catch, etc.)
      *
      */
-    mysql_query(conn, "select iphdr.ip_src, iphdr.ip_dst, signature.sig_sid, signature.sig_name, count(*) as sum from event, signature, iphdr where event.cid < 1000 and iphdr.cid = event.cid and signature.sig_id = event.signature group by ip_src, ip_dst, sig_name order by count(*) desc");
+    mysql_query(conn, "select inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst), signature.sig_sid, signature.sig_name, count(*) as sum from event, signature, iphdr where event.cid < 1000 and iphdr.cid = event.cid and signature.sig_id = event.signature group by ip_src, ip_dst, sig_name order by count(*) desc");
 
     result = mysql_store_result(conn);
 
@@ -176,6 +176,16 @@ void GatherEvents (TServerMessage& messageObj)
         string sig_sid(row[2]);
         string sig_name(row[3]);
         string sum(row[4]);
+        
+        TMessageNode eventNode(eventListNode.Append("EVENT","",""));
+        
+        eventNode.AddAttribute("src", ip_src);
+        eventNode.AddAttribute("dst", ip_dst);
+        
+        eventNode.AddAttribute("sid", sig_sid);
+        eventNode.AddAttribute("sig", sig_name);
+        eventNode.AddAttribute("sum", sum);
+
         WriteToMessagesLog("SELECT Results:");
         WriteToMessagesLog("\t IP SRC: " + ip_src);
         WriteToMessagesLog("\t IP DST: " + ip_dst);
