@@ -34,3 +34,23 @@ task :clean do
     end
     puts "> Cleaning - all... done"
 end
+
+desc "Build *"
+task :build do
+    puts "> Building - all..."
+    projects.each do |proj|
+        subtask = proj + ":build"
+        Rake::Task[subtask].invoke
+    end
+    puts "> Building - all... done"
+end
+
+desc "Install *"
+task :install do
+    puts "> Installing - all..."
+    projects.each do |proj|
+        subtask = proj + ":install"
+        Rake::Task[subtask].invoke
+    end
+    puts "> Installing - all... done"
+end
