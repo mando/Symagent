@@ -24,6 +24,8 @@
 //---------------------------------------------------------------------
 #include "plugin-main.h"
 
+#include "gather-task.h"
+
 #include "../../plugin-api.h"
 
 #include <iostream>
@@ -48,6 +50,12 @@ struct MysqlConnectParams
       std::string pass;
     };
 
+struct QueryParams
+    {
+      std::string start_time;
+      std::string end_time;
+    };
+
 typedef	vector<MysqlConnectParams>                MysqlConnectParamsList;
 typedef	MysqlConnectParamsList::iterator          MysqlConnectParamsList_iter;
 typedef	MysqlConnectParamsList::const_iterator    MysqlConnectParamsList_const_iter;
@@ -55,13 +63,15 @@ typedef	MysqlConnectParamsList::const_iterator    MysqlConnectParamsList_const_i
 struct ModGlobals
   {
     MysqlConnectParams  connectParams;
+    QueryParams         queryParams;
   };
 
 //---------------------------------------------------------------------
 // Globals
 //---------------------------------------------------------------------
-static pthread_once_t									gModInitControl = PTHREAD_ONCE_INIT;
-static ModGlobals*                    gModGlobalsPtr  = NULL;
+//static pthread_once_t									gModInitControl = PTHREAD_ONCE_INIT;
+static ModGlobals*                      gModGlobalsPtr  = NULL;
+static	TPthreadMutexObj								gModGlobalsMutex;
 //---------------------------------------------------------------------
 // AgentName - API function
 //---------------------------------------------------------------------
@@ -99,6 +109,7 @@ void AgentEnvironment (TLoginDataNode& loginEnvNode)
 
   if (!gModGlobalsPtr)
   {
+		InitModEnviron();
 		gModGlobalsPtr = new ModGlobals;
   }
   else 
@@ -106,7 +117,7 @@ void AgentEnvironment (TLoginDataNode& loginEnvNode)
     delete(gModGlobalsPtr);
 		gModGlobalsPtr = new ModGlobals;
   }
-	pthread_once(&gModInitControl,InitModEnviron);
+	//pthread_once(&gModInitControl,InitModEnviron);
 }
 
 //---------------------------------------------------------------------
@@ -114,123 +125,41 @@ void AgentEnvironment (TLoginDataNode& loginEnvNode)
 //---------------------------------------------------------------------
 bool AgentInit (const TPreferenceNode& preferenceNode)
 {
+  
   bool initialized = false;
 
-  if (preferenceNode.IsValid()) 
-  { 
-    for (unsigned long x = 0; x < preferenceNode.SubnodeCount(); x++)
-    {
-      const TPreferenceNode   prefNode(preferenceNode.GetNthSubnode(x));
+  if (gModGlobalsPtr) {
+    TLockedPthreadMutexObj lock(gModGlobalsMutex);
 
-      if (prefNode.GetTag() == "DB")
+    if (preferenceNode.IsValid()) 
+    { 
+      for (unsigned long x = 0; x < preferenceNode.SubnodeCount(); x++)
       {
-        MysqlConnectParams cParam;
+        const TPreferenceNode   prefNode(preferenceNode.GetNthSubnode(x));
 
-        cParam.server = prefNode.GetAttributeValue("host");
-        cParam.db     = prefNode.GetAttributeValue("name");
-        cParam.user   = prefNode.GetAttributeValue("user");
-        cParam.pass   = prefNode.GetAttributeValue("pass");
+        if (prefNode.GetTag() == "DB")
+        {
+          MysqlConnectParams cParam;
+          QueryParams        qParam;
 
-        gModGlobalsPtr->connectParams = cParam;
+          cParam.server = prefNode.GetAttributeValue("host");
+          cParam.db     = prefNode.GetAttributeValue("name");
+          cParam.user   = prefNode.GetAttributeValue("user");
+          cParam.pass   = prefNode.GetAttributeValue("pass");
+          
+          gModGlobalsPtr->connectParams = cParam;
+
+          qParam.start_time = prefNode.GetAttributeValue("start_time");
+          qParam.end_time   = prefNode.GetAttributeValue("end_time");
+
+          gModGlobalsPtr->queryParams = qParam;
+        }
       }
+      initialized = true;
     }
-    initialized = true;
+
   }
 	return initialized;
-}
-
-//---------------------------------------------------------------------
-// GatherEvents - Talk to MySQL 
-//---------------------------------------------------------------------
-void GatherEvents (TServerMessage& messageObj)
-{
-    TMessageNode  eventListNode(messageObj.Append("EVENT_LIST", "", ""));
-
-    MYSQL       *conn;
-    MYSQL_RES   *result;
-    MYSQL_ROW   row;
-
-    conn = mysql_init(NULL);
-
-    if (conn == NULL) {
-        WriteToErrorLog("MySQL init ERROR");
-    }
-
-    if (mysql_real_connect(conn, gModGlobalsPtr->connectParams.server.c_str(), gModGlobalsPtr->connectParams.user.c_str(), gModGlobalsPtr->connectParams.pass.c_str(), gModGlobalsPtr->connectParams.db.c_str(), 0, NULL, 0) == NULL) {
-        WriteToErrorLog("MySQL connect ERROR"); 
-    }
-    
-
-    /* 
-     * Make sure this query is good.  segfault otherwise.
-     * TODO: Figure out the right way to handle bad queries (try/catch, etc.)
-     *
-     */
-    mysql_query(conn, "select inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst), signature.sig_sid, signature.sig_name, count(*) as sum from event, signature, iphdr where event.cid < 1000 and iphdr.cid = event.cid and signature.sig_id = event.signature group by ip_src, ip_dst, sig_name order by count(*) desc");
-
-    result = mysql_store_result(conn);
-
-    while ((row = mysql_fetch_row(result))) {
-        string ip_src(row[0]);
-        string ip_dst(row[1]);
-        string sig_sid(row[2]);
-        string sig_name(row[3]);
-        string sum(row[4]);
-        
-        TMessageNode eventNode(eventListNode.Append("EVENT","",""));
-        
-        eventNode.AddAttribute("src", ip_src);
-        eventNode.AddAttribute("dst", ip_dst);
-        
-        eventNode.AddAttribute("sid", sig_sid);
-        eventNode.AddAttribute("sig", sig_name);
-        eventNode.AddAttribute("sum", sum);
-
-        WriteToMessagesLog("SELECT Results:");
-        WriteToMessagesLog("\t IP SRC: " + ip_src);
-        WriteToMessagesLog("\t IP DST: " + ip_dst);
-        WriteToMessagesLog("\t SIG ID: " + sig_sid);
-        WriteToMessagesLog("\t SIG: " + sig_name);
-        WriteToMessagesLog("\t SUM: " + sum);
-    }
-
-    mysql_free_result(result);
-    mysql_close(conn);
-    
-    /*conn = dbi_conn_new("mysql");
-    
-    dbi_conn_set_option(conn, "host",     "64.128.30.207");
-    dbi_conn_set_option(conn, "dbname",   "snort");
-    dbi_conn_set_option(conn, "encoding", "UTF-8");
-    dbi_conn_set_option(conn, "username", "snort");
-    dbi_conn_set_option(conn, "password", "password");
-
-    if (dbi_conn_connect(conn) < 0) {
-        WriteToErrorLog("Could not connect."); 
-    } else {
-        result = dbi_conn_query(conn, "select count(0) count from events");
-
-        long long count = 0;
-
-        if (result) {
-            while (dbi_result_next_row(result)) {
-                count = dbi_result_get_longlong(result, "count");
-                
-                string logMessage;
-                logMessage = "NUM OF EVENTS: ";
-                std::stringstream appender;
-                appender << count;
-                logMessage += appender.str();
-
-                WriteToMessagesLog(logMessage);
-            }
-            dbi_result_free(result);
-        } else {
-            WriteToErrorLog("No Results :(");
-        }
-        dbi_conn_close(conn);
-    }
-    dbi_shutdown();*/
 }
 
 //---------------------------------------------------------------------
@@ -245,18 +174,37 @@ void AgentRun ()
 	  CreateModEnviron();
 	
 	  SetRunState(true);
-	
-	  try
-	  {
-    
-        GatherEvents(messageObj);
-        // Send it to the server
-        SendToServer(messageObj,replyObj);
-	  }
-    catch (...)
-    {
-        SetRunState(false);
-        throw;
+
+    if (gModGlobalsPtr) {
+      
+      try
+      {
+        TLockedPthreadMutexObj lock(gModGlobalsMutex);
+
+        TGatherEventsTask* taskObjPtr = new TGatherEventsTask;
+        
+        
+        MysqlConnectParams cParams    = gModGlobalsPtr->connectParams;
+        QueryParams qParams           = gModGlobalsPtr->queryParams; 
+       
+        taskObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.start_time, qParams.end_time);
+        AddTaskToQueue(taskObjPtr,true);
+        
+        PauseExecution(1);
+        
+        while (DoPluginEventLoop()) {
+          if (IsTaskInQueue(taskObjPtr)) {
+            PauseExecution(.5);
+          } else {
+            break;
+          }
+        }
+      }
+      catch (...)
+      {
+          SetRunState(false);
+          throw;
+      }
     }
 
     SetRunState(false);

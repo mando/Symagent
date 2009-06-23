@@ -101,9 +101,9 @@ bool DoPluginEventLoop ()
 	bool			result = false;
 	ModEnviron*		environPtr = GetModEnviron();
 	
-	if (environPtr)
+	if (environPtr) {
 		result = environPtr->GetRunState();
-	
+  }	
 	return result;
 }
 

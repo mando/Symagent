@@ -83,7 +83,8 @@ PROJECT_NAME					=	$(PROJECT_NAME_SHORT_NAME).la
 # Things
 
 MODULE_OBJECTS					= 	plugin-main.lo \
-									plugin-utils.lo
+									plugin-utils.lo \
+									gather-task.lo
 
 #****************************************************************************
 #*																			*
@@ -149,6 +150,12 @@ uninstall:
 #
 ############################################################################
 
+gather-task.lo: 				gather-task.cc \
+								gather-task.h \
+								plugin-config.h \
+								plugin-defs.h \
+								plugin-utils.h
+ 
 plugin-main.lo:					plugin-main.cc \
 								plugin-main.h \
 								plugin-config.h \
