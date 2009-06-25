@@ -327,7 +327,7 @@ int main (int argc, char** argv)
 										
 										// Since we can't depend on our environment, spawn
 										// a new instance of the agent
-										RestartAgentFromNewInstance(0);
+										//RestartAgentFromNewInstance(0);
 									}
 									else if (haveConnection && !agentInited)
 									{
@@ -350,7 +350,7 @@ int main (int argc, char** argv)
 						if (CurrentRunState() != kRunStateStop && CurrentRunState() != kRunStateTerminate)
 						{
 							// SetRunState(kRunStateRun);
-							RestartAgentFromNewInstance(0);
+							//RestartAgentFromNewInstance(0);
 						}
 					}
 					while (DoMainEventLoop());
