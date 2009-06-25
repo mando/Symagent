@@ -52,8 +52,8 @@ struct MysqlConnectParams
 
 struct QueryParams
     {
-      std::string start_time;
-      std::string end_time;
+      std::string max_cid;
+      std::string min_cid;
     };
 
 typedef	vector<MysqlConnectParams>                MysqlConnectParamsList;
@@ -149,8 +149,8 @@ bool AgentInit (const TPreferenceNode& preferenceNode)
           
           gModGlobalsPtr->connectParams = cParam;
 
-          qParam.start_time = prefNode.GetAttributeValue("start_time");
-          qParam.end_time   = prefNode.GetAttributeValue("end_time");
+          qParam.max_cid = prefNode.GetAttributeValue("max_cid");
+          qParam.min_cid = prefNode.GetAttributeValue("min_cid");
 
           gModGlobalsPtr->queryParams = qParam;
         }
@@ -187,8 +187,13 @@ void AgentRun ()
         MysqlConnectParams cParams    = gModGlobalsPtr->connectParams;
         QueryParams qParams           = gModGlobalsPtr->queryParams; 
        
-        taskObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.start_time, qParams.end_time);
+        taskObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.max_cid, qParams.min_cid);
         AddTaskToQueue(taskObjPtr,true);
+
+        // This means we've never run before, so we need to add a new task.
+        if (qParams.max_cid.compare("0") == 0) {
+
+        }
         
         PauseExecution(1);
         

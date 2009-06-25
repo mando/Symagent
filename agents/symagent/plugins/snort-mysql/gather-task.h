@@ -29,7 +29,6 @@
 
 #include "plugin-defs.h"
 #include "plugin-utils.h"
-
 #include <mysql/mysql.h>
 //---------------------------------------------------------------------
 // Import namespace symbols
@@ -73,7 +72,7 @@ class TGatherEventsTask : public TTaskBase
 		
 		TGatherEventsTask (const TGatherEventsTask& obj) {}
 			// Copy constructor is illegal
-	
+
 	public:
 		
 		virtual ~TGatherEventsTask ();
@@ -83,25 +82,25 @@ class TGatherEventsTask : public TTaskBase
 								const string& server,
 								const string& user,
 								const string& pass,
-								const string& start_time,
-								const string& end_time,
-								time_t scanInterval = 60);
+								const string& max_cid,
+								const string& min_cid,
+								time_t scanInterval = 30);
 		
 		virtual void RunTask ();
 			// Thread entry point for the task.  Really just a wrapper for Main().
 		
 		virtual void Main (TServerMessage& messageObj);
 			// ¥¥¥
-	
+
 	protected:
 		
 		string									  fdbName;
 		string									  fserverName;
 		string									  fuserName;
 		string									  fpassword;
-		string									  fstartTime;
-		string									  fendTime;
-	
+    string                    fmaxCid;
+    string                    fminCid;
+    
     MYSQL                     fconn;
 		ModEnviron*								fParentEnvironPtr;
 			
