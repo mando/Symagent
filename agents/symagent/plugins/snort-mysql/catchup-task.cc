@@ -5,7 +5,7 @@
 #		Real-time Network Threat Modeling
 #		(C) 2002-2004 Symbiot, Inc.	---	ALL RIGHTS RESERVED
 #		
-#		Plugin agent to gather snort events from MySQL
+#		Plugin agent to catch up missing snort events from MySQL
 #		
 #		http://www.symbiot.com
 #		
@@ -19,19 +19,19 @@
 //---------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------
-#include "gather-task.h"
+#include "catchup-task.h"
 #include "plugin-utils.h"
 
 #include <mysql/mysql.h>
 
 //*********************************************************************
-// Class TGatherEventsTask
+// Class TCatchUpTask
 //*********************************************************************
 
 //---------------------------------------------------------------------
 // Constructor
 //---------------------------------------------------------------------
-TGatherEventsTask::TGatherEventsTask ()
+TCatchUpTask::TCatchUpTask ()
 	:	Inherited(PROJECT_SHORT_NAME,0,false),
 		fParentEnvironPtr(GetModEnviron())
 {
@@ -40,14 +40,14 @@ TGatherEventsTask::TGatherEventsTask ()
 //---------------------------------------------------------------------
 // Destructor
 //---------------------------------------------------------------------
-TGatherEventsTask::~TGatherEventsTask ()
+TCatchUpTask::~TCatchUpTask ()
 {
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::SetupTask
+// TCatchUpTask::SetupTask
 //---------------------------------------------------------------------
-void TGatherEventsTask::SetupTask (const string& db,
+void TCatchUpTask::SetupTask (const string& db,
 									const string& server,
 									const string& user,
 									const string& pass,
@@ -56,7 +56,7 @@ void TGatherEventsTask::SetupTask (const string& db,
 									time_t scanInterval)
 {
 
-  WriteToMessagesLog("in Gather Setup Task");
+  WriteToMessagesLog("in Catch Up Setup Task");
 	if (!db.empty())
 		fdbName = db;
 	else
@@ -92,18 +92,18 @@ void TGatherEventsTask::SetupTask (const string& db,
  
   if (scanInterval > 0)
 	{
-    WriteToMessagesLog("setting Gather rerun to true");
-		SetExecutionInterval(10);
+    WriteToMessagesLog("setting Catchup rerun to true");
+		SetExecutionInterval(1);
 		SetRerun(true);
 	}
 
-  WriteToMessagesLog("leaving SetupTask");
+  WriteToMessagesLog("leaving Catchup SetupTask");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::RunTask
+// TCatchUpTask::RunTask
 //---------------------------------------------------------------------
-void TGatherEventsTask::RunTask ()
+void TCatchUpTask::RunTask ()
 {
 	TServerMessage		messageObj;
 	TServerReply		  replyObj;
@@ -111,7 +111,7 @@ void TGatherEventsTask::RunTask ()
   // Create our thread environment
 	CreateModEnviron(fParentEnvironPtr);
 
-  WriteToMessagesLog("in RunTask");
+  WriteToMessagesLog("in CatchUp RunTask");
   
   if (DoPluginEventLoop()) {
 		Main(messageObj);
@@ -119,17 +119,17 @@ void TGatherEventsTask::RunTask ()
 		SendToServer(messageObj,replyObj);
   }
 
-  WriteToMessagesLog("done with RunTask");
+  WriteToMessagesLog("done with CatchUp RunTask");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::Main
+// TCatchUpTask::Main
 //---------------------------------------------------------------------
-void TGatherEventsTask::Main (TServerMessage& messageObj)
+void TCatchUpTask::Main (TServerMessage& messageObj)
 {
-    WriteToMessagesLog("In GatherTasks Main");
-    WriteToMessagesLog("fmaxCid: " + fmaxCid);
-    WriteToMessagesLog("fminCid: " + fminCid);
+    WriteToMessagesLog("In CatchUp Main");
+    WriteToMessagesLog("CatchUp fmaxCid: " + fmaxCid);
+    WriteToMessagesLog("CatchUp fminCid: " + fminCid);
     TMessageNode  eventListNode(messageObj.Append("EVENT_LIST", "", ""));
 
     MYSQL       *conn;
@@ -166,15 +166,12 @@ void TGatherEventsTask::Main (TServerMessage& messageObj)
     std::string query = GetQuery();
     
     mysql_query(conn, query.c_str());
-    WriteToMessagesLog("query:");
+    WriteToMessagesLog("Catch Up query:");
     WriteToMessagesLog(query);
    
     result = mysql_store_result(conn);
    
-    int min_cid = 0;
-    int max_cid = 0;
-
-    int counter = 0;
+    int i_fmaxCid = static_cast<int>(StringToNum(fmaxCid));
 
     while ((row = mysql_fetch_row(result))) {
         string cid(row[0]);
@@ -194,50 +191,46 @@ void TGatherEventsTask::Main (TServerMessage& messageObj)
 
         int i_cid = static_cast<int>(StringToNum(cid));
 
-        if (i_cid < min_cid) {
-          min_cid = i_cid;
+        if (i_cid < i_fmaxCid) {
+          i_fmaxCid = i_cid;
         }
-     
-        if (i_cid > max_cid) {
-          max_cid = i_cid;
-        }
-
-        counter++;
     }
 
     WriteToMessagesLog("After query: ");
-    WriteToMessagesLog("max cid: " + IntToString(max_cid));
-    WriteToMessagesLog("min cid: " + IntToString(min_cid));
 
-    // If we got at least one result, let's use the cids as our new max and min.
-    if (counter > 0) {
-      fmaxCid.assign(IntToString(max_cid));
-      fminCid.assign(IntToString(min_cid));
-    }
-   
-    WriteToMessagesLog("fmaxCid: " + fmaxCid);
-    WriteToMessagesLog("fminCid: " + fminCid);
+    fmaxCid.assign(IntToString(i_fmaxCid));
+
+    WriteToMessagesLog(" CatchUp fmaxCid: " + fmaxCid);
+    WriteToMessagesLog("CatchUp fminCid: " + fminCid);
 
     mysql_free_result(result);
     mysql_close(conn);
-    WriteToMessagesLog("Done with GatherTasks Main");
+    WriteToMessagesLog("Done with CatchUp Main");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::GetQuery
+// TCatchUpTask::GetQuery
 //---------------------------------------------------------------------
-std::string TGatherEventsTask::GetQuery ()
+std::string TCatchUpTask::GetQuery ()
 {
     std::string query;
-    std::string direction = "asc";
+    std::string direction = " desc ";
+    std::string limit = " limit 10 ";
+
+    // Swap min and max for catchup logic
+    //fmaxCid.swap(fminCid);
 
     query = "select event.cid, signature.sig_name, event.timestamp, inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst) from event, signature, iphdr where iphdr.cid = event.cid and event.signature = signature.sig_id";
     
-    query += " and event.cid > ";
-    query += fmaxCid.c_str();
+    query += " and event.cid >= ";
+    query += fminCid.c_str();
     
+    query += " and event.cid < ";
+    query+= fmaxCid.c_str();
+
     query += " order by event.cid ";
     query += direction;
 
+    query += limit;
     return query;
 }

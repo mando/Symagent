@@ -25,6 +25,8 @@
 #include "plugin-main.h"
 
 #include "gather-task.h"
+#include "catchup-task.h"
+#include "stat-task.h"
 
 #include "../../plugin-api.h"
 
@@ -54,11 +56,16 @@ struct QueryParams
     {
       std::string max_cid;
       std::string min_cid;
+
+      std::string catchup_max_cid;
+      std::string catchup_min_cid;
+  
+      bool stat;
     };
 
-typedef	vector<MysqlConnectParams>                MysqlConnectParamsList;
-typedef	MysqlConnectParamsList::iterator          MysqlConnectParamsList_iter;
-typedef	MysqlConnectParamsList::const_iterator    MysqlConnectParamsList_const_iter;
+typedef	vector<TGatherEventsTask*>                GatherTaskObjList;
+typedef	GatherTaskObjList::iterator               GatherTaskObjList_iter;
+typedef	GatherTaskObjList::const_iterator         GatherTaskObjList_const_iter;
 
 struct ModGlobals
   {
@@ -140,7 +147,6 @@ bool AgentInit (const TPreferenceNode& preferenceNode)
         if (prefNode.GetTag() == "DB")
         {
           MysqlConnectParams cParam;
-          QueryParams        qParam;
 
           cParam.server = prefNode.GetAttributeValue("host");
           cParam.db     = prefNode.GetAttributeValue("name");
@@ -148,9 +154,25 @@ bool AgentInit (const TPreferenceNode& preferenceNode)
           cParam.pass   = prefNode.GetAttributeValue("pass");
           
           gModGlobalsPtr->connectParams = cParam;
+        }
 
+        if (prefNode.GetTag() == "PARAMS")
+        {
+          QueryParams        qParam;
+          
           qParam.max_cid = prefNode.GetAttributeValue("max_cid");
           qParam.min_cid = prefNode.GetAttributeValue("min_cid");
+
+          qParam.catchup_max_cid = prefNode.GetAttributeValue("catchup_max_cid");
+          qParam.catchup_min_cid = prefNode.GetAttributeValue("catchup_min_cid");
+
+          qParam.stat = false;
+
+          if (!prefNode.GetAttributeValue("stat").empty()) {
+            WriteToMessagesLog("stat isn't empty, so it's true!");
+            WriteToMessagesLog("val of stat: |" + prefNode.GetAttributeValue("stat") + "|");
+            qParam.stat = true;
+          }
 
           gModGlobalsPtr->queryParams = qParam;
         }
@@ -167,8 +189,9 @@ bool AgentInit (const TPreferenceNode& preferenceNode)
 //---------------------------------------------------------------------
 void AgentRun ()
 {
-    TServerMessage  messageObj;
-    TServerReply    replyObj;	
+    WriteToMessagesLog("in AgentRun");
+   
+    GatherTaskObjList     taskObjPtrList;
     
     // Create our thread environment
 	  CreateModEnviron();
@@ -181,37 +204,69 @@ void AgentRun ()
       {
         TLockedPthreadMutexObj lock(gModGlobalsMutex);
 
-        TGatherEventsTask* taskObjPtr = new TGatherEventsTask;
-        
-        
         MysqlConnectParams cParams    = gModGlobalsPtr->connectParams;
         QueryParams qParams           = gModGlobalsPtr->queryParams; 
+          
+        TGatherEventsTask* gatherObjPtr   = new TGatherEventsTask;
+        TStatEventsTask*   statObjPtr     = new TStatEventsTask;
+        TCatchUpTask*      catchupObjPtr  = new TCatchUpTask;
        
-        taskObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.max_cid, qParams.min_cid);
-        AddTaskToQueue(taskObjPtr,true);
+        if (qParams.stat) 
+        {
+          WriteToMessagesLog("creating stat task");
+          statObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass);
+          WriteToMessagesLog("adding stat task to queue");
+          AddTaskToQueue(statObjPtr, true);
+        } 
+        else 
+        {
+          WriteToMessagesLog("creating first task");
+          
+          
+          //TODO: I don't like sending 0 here for the min
+          gatherObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.max_cid, "0");
+          WriteToMessagesLog("adding first task to queue");
+          AddTaskToQueue(gatherObjPtr,true);
 
-        // This means we've never run before, so we need to add a new task.
-        if (qParams.max_cid.compare("0") == 0) {
-
-        }
-        
+          // Catchup task
+          if (! qParams.catchup_max_cid.empty()) 
+          {
+            WriteToMessagesLog("registering catchup task.");
+            //
+            // TODO:  I'm flipping the min and max values to handle the catchup logic.  Not obvious:  should I make yet another task?
+            //
+            catchupObjPtr->SetupTask(cParams.db, cParams.server, cParams.user, cParams.pass, qParams.catchup_max_cid, qParams.catchup_min_cid);
+            AddTaskToQueue(catchupObjPtr, true);
+          }
+        } 
+          
         PauseExecution(1);
-        
-        while (DoPluginEventLoop()) {
-          if (IsTaskInQueue(taskObjPtr)) {
-            PauseExecution(.5);
-          } else {
-            break;
+       
+        if (!qParams.stat) 
+        {
+          while (DoPluginEventLoop()) 
+          {
+            //if (IsTaskInQueue(gatherObjPtr) || IsTaskInQueue(catchupObjPtr))
+            //if (IsTaskInQueue(catchupObjPtr))
+            if (IsTaskInQueue(gatherObjPtr))
+            {
+              PauseExecution(.5);
+            } else 
+            {
+              break;
+            }
           }
         }
       }
       catch (...)
       {
+          WriteToMessagesLog("uhoh:  exception?");
           SetRunState(false);
           throw;
       }
     }
 
+    WriteToMessagesLog("done running ");
     SetRunState(false);
 }
 

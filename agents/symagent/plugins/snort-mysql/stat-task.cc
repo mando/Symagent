@@ -5,7 +5,7 @@
 #		Real-time Network Threat Modeling
 #		(C) 2002-2004 Symbiot, Inc.	---	ALL RIGHTS RESERVED
 #		
-#		Plugin agent to gather snort events from MySQL
+#		Plugin agent to stat snort event info from MySQL
 #		
 #		http://www.symbiot.com
 #		
@@ -19,19 +19,17 @@
 //---------------------------------------------------------------------
 // Includes
 //---------------------------------------------------------------------
-#include "gather-task.h"
-#include "plugin-utils.h"
-
+#include "stat-task.h"
 #include <mysql/mysql.h>
 
 //*********************************************************************
-// Class TGatherEventsTask
+// Class TStatEventsTask
 //*********************************************************************
 
 //---------------------------------------------------------------------
 // Constructor
 //---------------------------------------------------------------------
-TGatherEventsTask::TGatherEventsTask ()
+TStatEventsTask::TStatEventsTask ()
 	:	Inherited(PROJECT_SHORT_NAME,0,false),
 		fParentEnvironPtr(GetModEnviron())
 {
@@ -40,23 +38,21 @@ TGatherEventsTask::TGatherEventsTask ()
 //---------------------------------------------------------------------
 // Destructor
 //---------------------------------------------------------------------
-TGatherEventsTask::~TGatherEventsTask ()
+TStatEventsTask::~TStatEventsTask ()
 {
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::SetupTask
+// TStatEventsTask::SetupTask
 //---------------------------------------------------------------------
-void TGatherEventsTask::SetupTask (const string& db,
+void TStatEventsTask::SetupTask (const string& db,
 									const string& server,
 									const string& user,
-									const string& pass,
-									const string& max_cid,
-									const string& min_cid,
-									time_t scanInterval)
+									const string& pass)
 {
 
-  WriteToMessagesLog("in Gather Setup Task");
+  WriteToMessagesLog("in Stat Setuptask");
+
 	if (!db.empty())
 		fdbName = db;
 	else
@@ -76,34 +72,13 @@ void TGatherEventsTask::SetupTask (const string& db,
 		fpassword = pass;
 	else
 		throw TSymLibErrorObj(kErrorPasswordNotSpecified,"Password not defined");
- 
 
-  if (!max_cid.empty()) {
-    fmaxCid = max_cid;
-  } else {
-    throw TSymLibErrorObj(kErrorStartTimeNotSpecified,"Start Time not defined");
-  }
-
-  if (!min_cid.empty()) {
-    fminCid = min_cid;
-  } else {
-    throw TSymLibErrorObj(kErrorEndTimeNotSpecified,"End Time not defined");
-  }
- 
-  if (scanInterval > 0)
-	{
-    WriteToMessagesLog("setting Gather rerun to true");
-		SetExecutionInterval(10);
-		SetRerun(true);
-	}
-
-  WriteToMessagesLog("leaving SetupTask");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::RunTask
+// TStatEventsTask::RunTask
 //---------------------------------------------------------------------
-void TGatherEventsTask::RunTask ()
+void TStatEventsTask::RunTask ()
 {
 	TServerMessage		messageObj;
 	TServerReply		  replyObj;
@@ -111,25 +86,19 @@ void TGatherEventsTask::RunTask ()
   // Create our thread environment
 	CreateModEnviron(fParentEnvironPtr);
 
-  WriteToMessagesLog("in RunTask");
-  
-  if (DoPluginEventLoop()) {
-		Main(messageObj);
-		// Send it to the server
-		SendToServer(messageObj,replyObj);
-  }
+  WriteToMessagesLog("in Stat RunTask");
 
-  WriteToMessagesLog("done with RunTask");
+	Main(messageObj);
+	SendToServer(messageObj,replyObj);
+
+  WriteToMessagesLog("done with Stat RunTask?!");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::Main
+// TStatEventsTask::Main
 //---------------------------------------------------------------------
-void TGatherEventsTask::Main (TServerMessage& messageObj)
+void TStatEventsTask::Main (TServerMessage& messageObj)
 {
-    WriteToMessagesLog("In GatherTasks Main");
-    WriteToMessagesLog("fmaxCid: " + fmaxCid);
-    WriteToMessagesLog("fminCid: " + fminCid);
     TMessageNode  eventListNode(messageObj.Append("EVENT_LIST", "", ""));
 
     MYSQL       *conn;
@@ -171,73 +140,30 @@ void TGatherEventsTask::Main (TServerMessage& messageObj)
    
     result = mysql_store_result(conn);
    
-    int min_cid = 0;
-    int max_cid = 0;
+    //TODO: REALLY need to finish refactoring this
+    
+    row = mysql_fetch_row(result);
 
-    int counter = 0;
-
-    while ((row = mysql_fetch_row(result))) {
-        string cid(row[0]);
-        string sig(row[1]);
-        string timestamp(row[2]);
-        string ip_src(row[3]);
-        string ip_dst(row[4]);
+    string min(row[0]);
+    string max(row[1]);
         
-        TMessageNode eventNode(eventListNode.Append("EVENT","",""));
-        
-        eventNode.AddAttribute("cid", cid);
-        eventNode.AddAttribute("sig", sig);
-        eventNode.AddAttribute("src", ip_src);
-        eventNode.AddAttribute("dst", ip_dst);
-        eventNode.AddAttribute("timestamp", timestamp);
-
-
-        int i_cid = static_cast<int>(StringToNum(cid));
-
-        if (i_cid < min_cid) {
-          min_cid = i_cid;
-        }
-     
-        if (i_cid > max_cid) {
-          max_cid = i_cid;
-        }
-
-        counter++;
-    }
+    TMessageNode eventNode(eventListNode.Append("STAT","",""));
+    eventNode.AddAttribute("min", min);
+    eventNode.AddAttribute("max", max);
 
     WriteToMessagesLog("After query: ");
-    WriteToMessagesLog("max cid: " + IntToString(max_cid));
-    WriteToMessagesLog("min cid: " + IntToString(min_cid));
-
-    // If we got at least one result, let's use the cids as our new max and min.
-    if (counter > 0) {
-      fmaxCid.assign(IntToString(max_cid));
-      fminCid.assign(IntToString(min_cid));
-    }
-   
-    WriteToMessagesLog("fmaxCid: " + fmaxCid);
-    WriteToMessagesLog("fminCid: " + fminCid);
+    WriteToMessagesLog("max cid: " + max );
+    WriteToMessagesLog("min cid: " + min );
 
     mysql_free_result(result);
     mysql_close(conn);
-    WriteToMessagesLog("Done with GatherTasks Main");
 }
 
 //---------------------------------------------------------------------
-// TGatherEventsTask::GetQuery
+// TStatEventsTask::GetQuery
 //---------------------------------------------------------------------
-std::string TGatherEventsTask::GetQuery ()
+std::string TStatEventsTask::GetQuery ()
 {
-    std::string query;
-    std::string direction = "asc";
-
-    query = "select event.cid, signature.sig_name, event.timestamp, inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst) from event, signature, iphdr where iphdr.cid = event.cid and event.signature = signature.sig_id";
-    
-    query += " and event.cid > ";
-    query += fmaxCid.c_str();
-    
-    query += " order by event.cid ";
-    query += direction;
-
-    return query;
+  std::string query = "select min(cid), max(cid) from event";
+  return query;
 }

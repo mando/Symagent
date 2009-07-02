@@ -5,22 +5,18 @@
 #		Real-time Network Threat Modeling
 #		(C) 2002-2004 Symbiot, Inc.	---	ALL RIGHTS RESERVED
 #		
-#		Plugin agent to lookup remote machines' MAC addresses
+#		Plugin agent to catch up missing snort events
 #		
 #		http://www.symbiot.com
 #		
 #######################################################################
-#		Author: Borrowed Time, Inc.
-#		e-mail: libsymbiot@bti.net
-#		
-#		Created:					03 Feb 2004
-#		Last Modified:				24 Mar 2004
-#		
+#		Author: Mando Escamilla
+#		e-mail: mando@symbiot.com
 #######################################################################
 */
 
-#if !defined(GATHER_TASK)
-#define GATHER_TASK
+#if !defined(CATCHUP_TASK)
+#define CATCHUP_TASK
 
 //---------------------------------------------------------------------
 // Includes
@@ -40,7 +36,7 @@ using symbiot::TMessageNode;
 //---------------------------------------------------------------------
 // Forward Class Declarations
 //---------------------------------------------------------------------
-class TGatherEventsTask;
+class TCatchUpTask;
 
 //---------------------------------------------------------------------
 // Definitions
@@ -55,9 +51,9 @@ class TGatherEventsTask;
 #define		kErrorEndTimeNotSpecified           -24306
 
 //---------------------------------------------------------------------
-// Class TGatherEventsTask
+// Class TCatchUpTask
 //---------------------------------------------------------------------
-class TGatherEventsTask : public TTaskBase
+class TCatchUpTask : public TTaskBase
 {
 	private:
 		
@@ -65,17 +61,17 @@ class TGatherEventsTask : public TTaskBase
 	
 	public:
 		
-		TGatherEventsTask ();
+		TCatchUpTask ();
 			// Constructor
 	
 	private:
 		
-		TGatherEventsTask (const TGatherEventsTask& obj) {}
+		TCatchUpTask (const TCatchUpTask& obj) {}
 			// Copy constructor is illegal
 
 	public:
 		
-		virtual ~TGatherEventsTask ();
+		virtual ~TCatchUpTask ();
 			// Destructor
 		
 		virtual void SetupTask (const string& db,
@@ -84,7 +80,7 @@ class TGatherEventsTask : public TTaskBase
 								const string& pass,
 								const string& max_cid,
 								const string& min_cid,
-								time_t scanInterval = 1);
+								time_t scanInterval = 10);
 		
 		virtual void RunTask ();
 			// Thread entry point for the task.  Really just a wrapper for Main().
@@ -102,7 +98,6 @@ class TGatherEventsTask : public TTaskBase
 		string									  fpassword;
     string                    fmaxCid;
     string                    fminCid;
-    bool                      fcatchUp; 
 
     MYSQL                     fconn;
 		ModEnviron*								fParentEnvironPtr;

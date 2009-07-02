@@ -19,8 +19,8 @@
 #######################################################################
 */
 
-#if !defined(GATHER_TASK)
-#define GATHER_TASK
+#if !defined(STAT_TASK)
+#define STAT_TASK
 
 //---------------------------------------------------------------------
 // Includes
@@ -40,7 +40,7 @@ using symbiot::TMessageNode;
 //---------------------------------------------------------------------
 // Forward Class Declarations
 //---------------------------------------------------------------------
-class TGatherEventsTask;
+class TStatEventsTask;
 
 //---------------------------------------------------------------------
 // Definitions
@@ -55,9 +55,9 @@ class TGatherEventsTask;
 #define		kErrorEndTimeNotSpecified           -24306
 
 //---------------------------------------------------------------------
-// Class TGatherEventsTask
+// Class TStatEventsTask
 //---------------------------------------------------------------------
-class TGatherEventsTask : public TTaskBase
+class TStatEventsTask : public TTaskBase
 {
 	private:
 		
@@ -65,26 +65,23 @@ class TGatherEventsTask : public TTaskBase
 	
 	public:
 		
-		TGatherEventsTask ();
+		TStatEventsTask ();
 			// Constructor
 	
 	private:
 		
-		TGatherEventsTask (const TGatherEventsTask& obj) {}
+		TStatEventsTask (const TStatEventsTask& obj) {}
 			// Copy constructor is illegal
 
 	public:
 		
-		virtual ~TGatherEventsTask ();
+		virtual ~TStatEventsTask ();
 			// Destructor
 		
 		virtual void SetupTask (const string& db,
 								const string& server,
 								const string& user,
-								const string& pass,
-								const string& max_cid,
-								const string& min_cid,
-								time_t scanInterval = 1);
+								const string& pass);
 		
 		virtual void RunTask ();
 			// Thread entry point for the task.  Really just a wrapper for Main().
@@ -100,9 +97,6 @@ class TGatherEventsTask : public TTaskBase
 		string									  fserverName;
 		string									  fuserName;
 		string									  fpassword;
-    string                    fmaxCid;
-    string                    fminCid;
-    bool                      fcatchUp; 
 
     MYSQL                     fconn;
 		ModEnviron*								fParentEnvironPtr;
@@ -110,4 +104,4 @@ class TGatherEventsTask : public TTaskBase
 };
 
 //---------------------------------------------------------------------
-#endif // GATHER_TASK
+#endif // STAT_TASK

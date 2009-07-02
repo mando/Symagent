@@ -84,7 +84,9 @@ PROJECT_NAME					=	$(PROJECT_NAME_SHORT_NAME).la
 
 MODULE_OBJECTS					= 	plugin-main.lo \
 									plugin-utils.lo \
-									gather-task.lo
+									gather-task.lo \
+									catchup-task.lo \
+									stat-task.lo \
 
 #****************************************************************************
 #*																			*
@@ -149,9 +151,20 @@ uninstall:
 #	Rules to build the object files
 #
 ############################################################################
+stat-task.lo: 				stat-task.cc \
+								stat-task.h \
+								plugin-config.h \
+								plugin-defs.h \
+								plugin-utils.h
 
 gather-task.lo: 				gather-task.cc \
 								gather-task.h \
+								plugin-config.h \
+								plugin-defs.h \
+								plugin-utils.h
+
+catchup-task.lo: 				catchup-task.cc \
+								catchup-task.h \
 								plugin-config.h \
 								plugin-defs.h \
 								plugin-utils.h
