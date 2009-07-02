@@ -82,6 +82,9 @@ double StringToNum (const std::string& s);
 	// Converts the argument to a double, which can be coerced to any
 	// numeric type the caller needs.
 
+std::string IntToString(int i);
+	// Converts the argument to a string.
+
 //---------------------------------------------------------------------
 // NumToString
 //---------------------------------------------------------------------

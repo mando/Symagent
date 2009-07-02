@@ -130,3 +130,15 @@ double StringToNum (const std::string& s)
 	
 	return num;
 }
+
+//---------------------------------------------------------------------
+// IntToString 
+//---------------------------------------------------------------------
+std::string IntToString(int i)
+{
+	std::ostringstream osstream;
+	
+	osstream << i;
+	
+	return osstream.str();
+}
