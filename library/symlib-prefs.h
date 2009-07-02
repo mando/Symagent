@@ -78,7 +78,10 @@ class TLibSymPrefs
 		virtual void LoadLocalConfFile ();
 			// Loads and parses the local XML-formatted configuration file.
 		
-		virtual const TXMLNodeObj* AppendPrefNodePtr (const std::string& tag,
+		virtual void ClearPrefNodePtr ();
+			// Clears out the server preferences
+		
+    virtual const TXMLNodeObj* AppendPrefNodePtr (const std::string& tag,
 													  const std::string& data = "");
 			// еее
 		

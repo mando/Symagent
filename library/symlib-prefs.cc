@@ -122,6 +122,18 @@ void TLibSymPrefs::LoadLocalConfFile ()
 	gEnvironObjPtr->SetLogUser(GetPrefsPtr()->GetPrefData(kTagPrefLogUser));
 	gEnvironObjPtr->SetLogGroup(GetPrefsPtr()->GetPrefData(kTagPrefLogGroup));
 }
+//---------------------------------------------------------------------
+// TLibSymPrefs::ClearPrefNodePtr
+//---------------------------------------------------------------------
+void TLibSymPrefs::ClearPrefNodePtr()
+{
+	
+	TXMLNodeObj*		remoteRootNodePtr = new TXMLNodeObj;
+	
+  remoteRootNodePtr->SetTag(kTagPreferences);
+	remoteRootNodePtr->AddAttribute(kTagPrefAttribWhere,kTagPrefAttribValueRemote);
+	fPrefRemoteHomeNodePtr = const_cast<TXMLNodeObj*>(fPrefRootNode.Append(remoteRootNodePtr));
+}
 
 //---------------------------------------------------------------------
 // TLibSymPrefs::AppendPrefNodePtr

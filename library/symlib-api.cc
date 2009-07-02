@@ -620,7 +620,7 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 				TServerReply		reply;
 				TMessageNode		nodeRef;
                 
-                TLoginDataNode      interfaceNode("NETWORK_LIST");
+        TLoginDataNode      interfaceNode("NETWORK_LIST");
 
 				gServerObjPtr->Connect();
 				
@@ -662,6 +662,9 @@ void ConnectToServer (TLoginDataNode& additionalLoginNode)
 						case kResponseCodeOK:
 							{
 								// Stuff all the <CONFIG> stuff into our prefs
+
+                // HACK: Try clearing out some mem. 
+                GetPrefsPtr()->ClearPrefNodePtr();
 								
 								nodeRef = reply.FindNode(kMessageTypeValueConfig);
 								if (nodeRef.IsValid())
