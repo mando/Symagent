@@ -215,7 +215,7 @@ std::string TCatchUpTask::GetQuery ()
 {
     std::string query;
     std::string direction = " desc ";
-    std::string limit = " limit 10 ";
+    std::string limit = " limit 1000 ";
 
     // Swap min and max for catchup logic
     //fmaxCid.swap(fminCid);
