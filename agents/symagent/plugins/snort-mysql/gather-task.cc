@@ -182,6 +182,8 @@ void TGatherEventsTask::Main (TServerMessage& messageObj)
         string timestamp(row[2]);
         string ip_src(row[3]);
         string ip_dst(row[4]);
+        string class_id(row[5]);
+        string priority(row[6]);
         
         TMessageNode eventNode(eventListNode.Append("EVENT","",""));
         
@@ -190,6 +192,8 @@ void TGatherEventsTask::Main (TServerMessage& messageObj)
         eventNode.AddAttribute("src", ip_src);
         eventNode.AddAttribute("dst", ip_dst);
         eventNode.AddAttribute("timestamp", timestamp);
+        eventNode.AddAttribute("class_id", class_id);
+        eventNode.AddAttribute("priority", priority);
 
 
         int i_cid = static_cast<int>(StringToNum(cid));
@@ -231,7 +235,7 @@ std::string TGatherEventsTask::GetQuery ()
     std::string query;
     std::string direction = "asc";
 
-    query = "select event.cid, signature.sig_name, event.timestamp, inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst) from event, signature, iphdr where iphdr.cid = event.cid and event.signature = signature.sig_id";
+    query = "select event.cid, signature.sig_name, event.timestamp, inet_ntoa(iphdr.ip_src), inet_ntoa(iphdr.ip_dst), signature.sig_class_id, signature.sig_priority from event, signature, iphdr where iphdr.cid = event.cid and event.signature = signature.sig_id";
     
     query += " and event.cid > ";
     query += fmaxCid.c_str();
